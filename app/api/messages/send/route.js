@@ -16,7 +16,7 @@ const sendSchema = z.object({
 export async function POST(request) {
   try {
     const body = await request.json();
-    
+
     // Validate request body
     const result = sendSchema.safeParse(body);
     if (!result.success) {
@@ -28,7 +28,7 @@ export async function POST(request) {
     await dbConnect();
 
     // Verify workspace exists
-    const workspace = await Workspace.findById(workspace_id);
+    const workspace = await Workspace.findOne({ workspace_id });
     if (!workspace) {
       return NextResponse.json({ error: 'Workspace not found' }, { status: 404 });
     }
@@ -41,7 +41,7 @@ export async function POST(request) {
 
     // Attempt to send message via WhatsApp Cloud API
     const waResponse = await send_whatsapp_message(workspace_id, phone, text);
-    
+
     // Get the generated message ID from WhatsApp's response
     const waMessageId = waResponse.messages?.[0]?.id || '';
 

@@ -11,6 +11,8 @@ export async function GET(request) {
   const mode = searchParams.get('hub.mode');
   const token = searchParams.get('hub.verify_token');
   const challenge = searchParams.get('hub.challenge');
+  console.log("webhook verify token", token);
+  console.log("webhook verify token in env", process.env.WEBHOOK_VERIFY_TOKEN)
 
   if (mode && token) {
     if (mode === 'subscribe') {
@@ -40,6 +42,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
+    console.log('data from webhook', body)
 
     // Check if this is an event from a WhatsApp API
     if (body.object === 'whatsapp_business_account') {
@@ -78,13 +81,13 @@ export async function POST(request) {
 
             // 2. Find or create conversation
             let conversation = await Conversation.findOne({
-              workspace_id: workspace._id,
+              workspace_id: workspace.workspace_id,
               phone: senderPhone
             });
 
             if (!conversation) {
               conversation = await Conversation.create({
-                workspace_id: workspace._id,
+                workspace_id: workspace.workspace_id,
                 phone: senderPhone,
                 last_message_at: timestamp,
                 created_at: new Date()
@@ -101,7 +104,7 @@ export async function POST(request) {
             
             if (!existingMessage) {
               await Message.create({
-                workspace_id: workspace._id,
+                workspace_id: workspace.workspace_id,
                 conversation_id: conversation._id,
                 phone: senderPhone,
                 direction: 'incoming',

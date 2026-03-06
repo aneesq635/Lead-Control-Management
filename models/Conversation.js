@@ -2,8 +2,7 @@ import mongoose from 'mongoose';
 
 const conversationSchema = new mongoose.Schema({
   workspace_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Workspace',
+    type: String,
     required: true,
     index: true,
   },
