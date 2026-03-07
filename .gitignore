@@ -1,0 +1,18 @@
+# Environment variables (VERY IMPORTANT)
+.env
+.env.local
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# Virtual environments
+venv/
+env/
+
+# Nested git repository (IMPORTANT in your case)
+Lead-Control-Management/.git
+
+# IDE settings (optional but recommended)
+.idea/
+.vscode/
