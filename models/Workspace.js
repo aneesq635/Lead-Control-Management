@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const WorkspaceSchema = new mongoose.Schema(
   {
+    supabase_id:{
+    type: String,
+    required: true,
+    index: true,
+  },
     workspace_id: {
       type: String,
       required: true,

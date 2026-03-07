@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {useAuth} from "../../component/AuthContext"
 import Link from "next/link";
 
 export default function ConversationsPage() {
@@ -10,13 +11,19 @@ export default function ConversationsPage() {
   const [loadingWorkspaces, setLoadingWorkspaces] = useState(true);
   const [loadingConversations, setLoadingConversations] = useState(false);
   const [error, setError] = useState("");
+  const {user} = useAuth();
+  const supabase_id = user?.id
 
   // Fetch all workspaces on mount
   useEffect(() => {
+    // waiting if supabase id is not avaiable
+    if(!supabase_id) {
+      return;
+    }
     const fetchWorkspaces = async () => {
       setLoadingWorkspaces(true);
       try {
-        const res = await fetch("/api/workspace/get");
+        const res = await fetch(`/api/workspace/get?supabase_id=${supabase_id}`);
         const data = await res.json();
         if (data.success) {
           setWorkspaces(data.workspaces);
@@ -30,7 +37,7 @@ export default function ConversationsPage() {
       }
     };
     fetchWorkspaces();
-  }, []);
+  }, [supabase_id]);
 
   // Fetch conversations when a workspace is selected
   useEffect(() => {
@@ -59,6 +66,22 @@ export default function ConversationsPage() {
     };
     fetchConversations();
   }, [selectedWorkspace]);
+
+  if (!supabase_id) {
+    return (
+      <div className="flex-1 flex items-center justify-center min-h-[50vh] bg-gray-50 dark:bg-[#0a0a0a]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative w-10 h-10">
+            <div className="absolute inset-0 rounded-full border-2 border-gray-200 dark:border-gray-800" />
+            <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-black dark:border-t-white animate-spin" />
+          </div>
+          <p className="text-xs font-medium text-gray-400 dark:text-gray-500 tracking-wider uppercase">
+            Loading
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // ── No workspaces found ────────────────────────────────────────────────────
   if (!loadingWorkspaces && workspaces.length === 0) {

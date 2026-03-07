@@ -1,5 +1,7 @@
 // app/dashboard/page.js
-import { MessageSquare, Users, TrendingUp, Zap } from 'lucide-react';
+'use client'
+import { MessageSquare, Users, TrendingUp, Zap, Plus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const stats = [
   { label: 'Total Conversations', value: '1,284', change: '+12%', icon: MessageSquare },
@@ -9,17 +11,27 @@ const stats = [
 ];
 
 export default function DashboardPage() {
+  const router = useRouter()
   return (
     <div className="flex-1 p-8 bg-gray-50 dark:bg-[#0a0a0a] min-h-screen">
 
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-          Dashboard
-        </h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          Welcome back — here's what's happening today.
-        </p>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+            Dashboard
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Welcome back — here's what's happening today.
+          </p>
+        </div>
+        <button
+          onClick={() => router.push("/workspace/create")}
+          className="flex items-center gap-2 h-10 px-4 bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-black rounded-xl text-sm font-semibold transition-all duration-200 active:scale-[0.98] shrink-0 cursor-pointer"
+        >
+          <Plus className="w-4 h-4" />
+          New Workspace
+        </button>
       </div>
 
       {/* Stats Grid */}
@@ -45,7 +57,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Quick Actions */}
+      {/* Quick Actions
       <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-gray-800 rounded-2xl p-6">
         <h2 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 uppercase tracking-wider">
           Quick Start
@@ -76,7 +88,7 @@ export default function DashboardPage() {
             </div>
           </a>
         </div>
-      </div>
+      </div> */}
 
     </div>
   );

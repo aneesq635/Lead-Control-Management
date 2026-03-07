@@ -8,7 +8,7 @@ export async function POST(request) {
   try {
     await dbConnect();
     const body = await request.json();
-    const { company_name } = body;
+    const { company_name, supabase_id } = body;
 
     if (!company_name || !company_name.trim()) {
       return NextResponse.json(
@@ -20,6 +20,7 @@ export async function POST(request) {
     const workspace = await Workspace.create({
       workspace_id: uuidv4(),   // human-readable UUID stored as a field
       company_name: company_name.trim(),
+      supabase_id,
     });
 
     return NextResponse.json({ success: true, workspace }, { status: 201 });

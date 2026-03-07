@@ -199,8 +199,7 @@ const Header = () => {
                                     onClick={() => {
                                         router.push("/Authentication");
                                     }}>
-                                    Login
-                                    <span className='px-2 !text-sm !shadow-none text-black dark:text-white'>Signup</span>
+                                    Login/Signup
                                 </button>
                             </>
                         )}
