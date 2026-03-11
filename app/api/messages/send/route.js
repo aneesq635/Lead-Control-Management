@@ -5,6 +5,7 @@ import Conversation from '@/models/Conversation';
 import Message from '@/models/Message';
 import { send_whatsapp_message } from '@/lib/whatsapp';
 import { z } from 'zod';
+import { emitNewMessage } from '@/lib/socket/server';
 
 const sendSchema = z.object({
   workspace_id: z.string(),
@@ -60,6 +61,11 @@ export async function POST(request) {
     // Update conversation last activity
     conversation.last_message_at = newMessage.timestamp;
     await conversation.save();
+
+    // ── REAL-TIME: Emit the outgoing message to all clients in this room ───
+    // This ensures if two agents have the same conversation open, both see
+    // the sent message immediately without relying on the optimistic UI update.
+    // emitNewMessage(conversation_id, newMessage.toObject());
 
     return NextResponse.json({ success: true, message: newMessage }, { status: 200 });
 

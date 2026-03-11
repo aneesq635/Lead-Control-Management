@@ -3,6 +3,7 @@ import dbConnect from '@/lib/mongodb';
 import Workspace from '@/models/Workspace';
 import Conversation from '@/models/Conversation';
 import Message from '@/models/Message';
+import { emitNewMessage, emitConversationUpdated } from '@/lib/socket/server';
 
 
 export async function GET(request) {
@@ -103,7 +104,7 @@ export async function POST(request) {
             const existingMessage = await Message.findOne({ whatsapp_message_id: messageId });
             
             if (!existingMessage) {
-              await Message.create({
+              const savedMessage = await Message.create({
                 workspace_id: workspace.workspace_id,
                 conversation_id: conversation._id,
                 phone: senderPhone,
@@ -115,6 +116,20 @@ export async function POST(request) {
               });
               
               console.log(`Saved incoming message from ${senderPhone} for workspace ${workspace.company_name}`);
+
+              // ── REAL-TIME: Emit to subscribed frontend clients ──────────────
+              const conversationId = conversation._id.toString();
+
+              // 1. Push the new message to the open conversation thread
+              emitNewMessage(conversationId, savedMessage.toObject());
+
+              // 2. Update the conversations list page (last_message_at sort order)
+              emitConversationUpdated(workspace.workspace_id, {
+                _id: conversation._id,
+                phone: conversation.phone,
+                last_message_at: conversation.last_message_at,
+                workspace_id: conversation.workspace_id,
+              });
             }
           }
         }
