@@ -2,18 +2,11 @@
   "name": "lcm",
   "version": "0.1.0",
   "private": true,
-<<<<<<< HEAD
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-=======
   "type": "module",
   "scripts": {
     "dev": "node server.js",
     "build": "next build",
-    "start": "NODE_ENV=production node server.js",
->>>>>>> Socket_updated
+    "start": " node server.js",
     "lint": "eslint"
   },
   "dependencies": {
