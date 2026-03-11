@@ -65,7 +65,7 @@ export async function POST(request) {
     // ── REAL-TIME: Emit the outgoing message to all clients in this room ───
     // This ensures if two agents have the same conversation open, both see
     // the sent message immediately without relying on the optimistic UI update.
-    emitNewMessage(conversation_id, newMessage.toObject());
+    // emitNewMessage(conversation_id, newMessage.toObject());
 
     return NextResponse.json({ success: true, message: newMessage }, { status: 200 });
 
