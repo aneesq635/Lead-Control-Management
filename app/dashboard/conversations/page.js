@@ -1,224 +1,381 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {useAuth} from "../../component/AuthContext"
+import { useAuth } from "../../component/AuthContext";
 import Link from "next/link";
 
-export default function ConversationsPage() {
- const [workspaces, setWorkspaces] = useState([]);
- const [selectedWorkspace, setSelectedWorkspace] = useState(null);
- const [conversations, setConversations] = useState([]);
- const [loadingWorkspaces, setLoadingWorkspaces] = useState(true);
- const [loadingConversations, setLoadingConversations] = useState(false);
- const [error, setError] = useState("");
- const {user} = useAuth();
- const supabase_id = user?.id
+// selectedWorkspace will be passed via props for now
+// (later replace with state management / context)
+export default function ConversationsPage({ selectedWorkspace: propWorkspace }) {
+    const [conversations, setConversations] = useState([]);
+    const [loadingConversations, setLoadingConversations] = useState(false);
+    const [error, setError] = useState("");
+    const { user } = useAuth();
+    const supabase_id = user?.id;
 
- // Fetch all workspaces on mount
- useEffect(() => {
- // waiting if supabase id is not avaiable
- if(!supabase_id) {
- return;
- }
- const fetchWorkspaces = async () => {
- setLoadingWorkspaces(true);
- try {
- const res = await fetch(`/api/workspace/get?supabase_id=${supabase_id}`);
- const data = await res.json();
- if (data.success) {
- setWorkspaces(data.workspaces);
- } else {
- setError("Failed to load workspaces.");
- }
- } catch (err) {
- setError("Error fetching workspaces.");
- } finally {
- setLoadingWorkspaces(false);
- }
- };
- fetchWorkspaces();
- }, [supabase_id]);
+    // Use prop workspace if provided (from layout via context later)
+    const selectedWorkspace = propWorkspace || null;
 
- // Fetch conversations when a workspace is selected
- useEffect(() => {
- if (!selectedWorkspace) return;
+    // Fetch conversations when a workspace is selected
+    useEffect(() => {
+        if (!selectedWorkspace) return;
 
- const fetchConversations = async () => {
- setLoadingConversations(true);
- setConversations([]);
- setError("");
- try {
- const res = await fetch(
- `/api/conversations/get?workspaceId=${selectedWorkspace.workspace_id}`
- );
- const data = await res.json();
- console.log('data from conversations', data)
- if (data.success) {
- setConversations(data.conversations);
- } else {
- setError("Failed to load conversations.");
- }
- } catch (err) {
- setError("Error fetching conversations.");
- } finally {
- setLoadingConversations(false);
- }
- };
- fetchConversations();
- }, [selectedWorkspace]);
+        const fetchConversations = async () => {
+            setLoadingConversations(true);
+            setConversations([]);
+            setError("");
+            try {
+                const res = await fetch(
+                    `/api/conversations/get?workspaceId=${selectedWorkspace.workspace_id}`
+                );
+                const data = await res.json();
+                if (data.success) {
+                    setConversations(data.conversations);
+                } else {
+                    setError("Failed to load conversations.");
+                }
+            } catch (err) {
+                setError("Error fetching conversations.");
+            } finally {
+                setLoadingConversations(false);
+            }
+        };
+        fetchConversations();
+    }, [selectedWorkspace]);
 
- if (!supabase_id) {
- return (
- <div className="flex-1 flex items-center justify-center min-h-[50vh] bg-gray-50 [#0a0a0a]">
- <div className="flex flex-col items-center gap-4">
- <div className="relative w-10 h-10">
- <div className="absolute inset-0 rounded-full border-2 border-gray-200 " />
- <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-black animate-spin" />
- </div>
- <p className="text-xs font-medium text-gray-400 tracking-wider uppercase">
- Loading
- </p>
- </div>
- </div>
- );
- }
+    // Still loading auth
+    if (!supabase_id) {
+        return (
+            <div className="flex-1 flex items-center justify-center min-h-[50vh] bg-gray-50">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="relative w-10 h-10">
+                        <div className="absolute inset-0 rounded-full border-2 border-gray-200" />
+                        <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-black animate-spin" />
+                    </div>
+                    <p className="text-xs font-medium text-gray-400 tracking-wider uppercase">Loading</p>
+                </div>
+            </div>
+        );
+    }
 
- // ── No workspaces found ────────────────────────────────────────────────────
- if (!loadingWorkspaces && workspaces.length === 0) {
- return (
- <div className="flex flex-col items-center justify-center h-full p-8 text-center">
- <div className="text-5xl mb-4">💬</div>
- <h2 className="text-xl font-semibold text-gray-800 mb-2">No Workspaces Found</h2>
- <p className="text-gray-500 mb-6 text-sm">
- Please configure a workspace before viewing conversations.
- </p>
- <Link
- href="/dashboard/settings/whatsapp"
- className="bg-black text-white px-5 py-2 rounded-md text-sm hover:bg-gray-800 transition-colors"
- >
- Go to Settings
- </Link>
- </div>
- );
- }
-// Paste this return() into your Conversations list component
- return (
- <div className="flex flex-col h-full bg-gray-50 [#0a0a0a]">
+    return (
+        <div className="flex flex-col h-full bg-gray-50">
 
- {/* Header */}
- <header className="px-6 py-4 border-b border-gray-200 bg-white [#111] flex items-center gap-4 flex-wrap shrink-0">
- <h1 className="text-xl font-bold text-gray-900 tracking-tight">
- Conversations
- </h1>
+            {/* Header */}
+            <header className="px-6 py-4 border-b border-gray-200 bg-white flex items-center gap-4 flex-wrap shrink-0">
+                <h1 className="text-xl font-bold text-gray-900 tracking-tight">Conversations</h1>
 
- {/* Workspace Selector */}
- <div className="flex items-center gap-2.5 ml-auto flex-wrap">
- <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
- Workspace
- </span>
- {loadingWorkspaces ? (
- <div className="h-9 w-44 bg-gray-100 rounded-xl animate-pulse" />
- ) : (
- <select
- value={selectedWorkspace?.workspace_id || ""}
- onChange={(e) => {
- const ws = workspaces.find((w) => w.workspace_id === e.target.value);
- setSelectedWorkspace(ws || null);
- }}
- className="h-9 px-3 rounded-xl border border-gray-200 bg-white [#0a0a0a] text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-black :ring-white transition-all"
- >
- <option value="">Select workspace…</option>
- {workspaces.map((ws) => (
- <option key={ws.workspace_id} value={ws.workspace_id}>
- {ws.company_name}
- </option>
- ))}
- </select>
- )}
- </div>
- </header>
+                {selectedWorkspace && (
+                    <span className="ml-auto text-xs font-medium text-gray-400 bg-gray-100 px-3 py-1.5 rounded-xl">
+                        {selectedWorkspace.company_name}
+                    </span>
+                )}
+            </header>
 
- {/* Body */}
- <div className="flex-1 overflow-auto p-4 sm:p-6">
- <div className="max-w-3xl mx-auto w-full">
+            {/* Body */}
+            <div className="flex-1 overflow-auto p-4 sm:p-6">
+                <div className="max-w-3xl mx-auto w-full">
 
- {/* No workspace selected */}
- {!selectedWorkspace && !loadingWorkspaces && (
- <div className="text-center py-24">
- <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
- <span className="text-2xl">🏢</span>
- </div>
- <p className="font-semibold text-gray-700 ">No workspace selected</p>
- <p className="text-sm text-gray-400 mt-1">
- Choose a workspace above to view its conversations.
- </p>
- </div>
- )}
+                    {/* No workspace selected */}
+                    {!selectedWorkspace && (
+                        <div className="text-center py-24">
+                            <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                                <span className="text-2xl">🏢</span>
+                            </div>
+                            <p className="font-semibold text-gray-700">No workspace selected</p>
+                            <p className="text-sm text-gray-400 mt-1">
+                                Choose a workspace from the sidebar to view its conversations.
+                            </p>
+                        </div>
+                    )}
 
- {/* Loading */}
- {selectedWorkspace && loadingConversations && (
- <div className="space-y-2">
- {[...Array(5)].map((_, i) => (
- <div key={i} className="bg-white [#111] rounded-2xl border border-gray-200 p-4 animate-pulse">
- <div className="h-3.5 bg-gray-200 rounded-lg w-1/3 mb-2" />
- <div className="h-2.5 bg-gray-100 rounded-lg w-1/4" />
- </div>
- ))}
- </div>
- )}
+                    {/* Loading conversations */}
+                    {selectedWorkspace && loadingConversations && (
+                        <div className="space-y-2">
+                            {[...Array(5)].map((_, i) => (
+                                <div key={i} className="bg-white rounded-2xl border border-gray-200 p-4 animate-pulse">
+                                    <div className="h-3.5 bg-gray-200 rounded-lg w-1/3 mb-2" />
+                                    <div className="h-2.5 bg-gray-100 rounded-lg w-1/4" />
+                                </div>
+                            ))}
+                        </div>
+                    )}
 
- {/* Error */}
- {error && (
- <div className="text-center py-10 text-red-500 text-sm">{error}</div>
- )}
+                    {/* Error */}
+                    {error && (
+                        <div className="text-center py-10 text-red-500 text-sm">{error}</div>
+                    )}
 
- {/* Conversations */}
- {selectedWorkspace && !loadingConversations && !error && (
- conversations.length === 0 ? (
- <div className="text-center py-24">
- <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
- <span className="text-2xl">📭</span>
- </div>
- <p className="font-semibold text-gray-700 ">No conversations yet</p>
- <p className="text-sm text-gray-400 mt-1">
- When customers message your WhatsApp number, they'll appear here.
- </p>
- </div>
- ) : (
- <div className="space-y-2">
- {conversations.map((conv) => (
- <Link
- key={conv._id}
- href={`/dashboard/conversations/${conv._id}`}
- className="flex justify-between items-center bg-white [#111] border border-gray-200 rounded-2xl p-4 hover:border-gray-300 :border-gray-600 hover:shadow-sm transition-all duration-150 group"
- >
- <div className="flex items-center gap-3">
- <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center text-sm font-bold text-gray-600 shrink-0">
- {conv.phone?.slice(-2)}
- </div>
- <div>
- <h3 className="font-semibold text-gray-900 text-sm">{conv.phone}</h3>
- <p className="text-xs text-gray-400 mt-0.5">
- Started {new Date(conv.created_at).toLocaleDateString()}
- </p>
- </div>
- </div>
- <div className="text-xs text-gray-400 shrink-0 ml-4">
- {new Date(conv.last_message_at).toLocaleString([], {
- month: 'short', day: 'numeric',
- hour: '2-digit', minute: '2-digit'
- })}
- </div>
- </Link>
- ))}
- </div>
- )
- )}
+                    {/* Conversations list */}
+                    {selectedWorkspace && !loadingConversations && !error && (
+                        conversations.length === 0 ? (
+                            <div className="text-center py-24">
+                                <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                                    <span className="text-2xl">📭</span>
+                                </div>
+                                <p className="font-semibold text-gray-700">No conversations yet</p>
+                                <p className="text-sm text-gray-400 mt-1">
+                                    When customers message your WhatsApp number, they'll appear here.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="space-y-2">
+                                {conversations.map((conv) => (
+                                    <Link
+                                        key={conv._id}
+                                        href={`/dashboard/conversations/${conv._id}`}
+                                        className="flex justify-between items-center bg-white border border-gray-200 rounded-2xl p-4 hover:border-gray-300 hover:shadow-sm transition-all duration-150 group"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center text-sm font-bold text-gray-600 shrink-0">
+                                                {conv.phone?.slice(-2)}
+                                            </div>
+                                            <div>
+                                                <h3 className="font-semibold text-gray-900 text-sm">{conv.phone}</h3>
+                                                <p className="text-xs text-gray-400 mt-0.5">
+                                                    Started {new Date(conv.created_at).toLocaleDateString()}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="text-xs text-gray-400 shrink-0 ml-4">
+                                            {new Date(conv.last_message_at).toLocaleString([], {
+                                                month: 'short', day: 'numeric',
+                                                hour: '2-digit', minute: '2-digit'
+                                            })}
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        )
+                    )}
 
- </div>
- </div>
- </div>
- );
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// "use client";
+
+// import { useEffect, useState } from "react";
+// import {useAuth} from "../../component/AuthContext"
+// import Link from "next/link";
+
+// export default function ConversationsPage() {
+//  const [workspaces, setWorkspaces] = useState([]);
+//  const [selectedWorkspace, setSelectedWorkspace] = useState(null);
+//  const [conversations, setConversations] = useState([]);
+//  const [loadingWorkspaces, setLoadingWorkspaces] = useState(true);
+//  const [loadingConversations, setLoadingConversations] = useState(false);
+//  const [error, setError] = useState("");
+//  const {user} = useAuth();
+//  const supabase_id = user?.id
+
+//  // Fetch all workspaces on mount
+//  useEffect(() => {
+//  // waiting if supabase id is not avaiable
+//  if(!supabase_id) {
+//  return;
+//  }
+//  const fetchWorkspaces = async () => {
+//  setLoadingWorkspaces(true);
+//  try {
+//  const res = await fetch(`/api/workspace/get?supabase_id=${supabase_id}`);
+//  const data = await res.json();
+//  if (data.success) {
+//  setWorkspaces(data.workspaces);
+//  } else {
+//  setError("Failed to load workspaces.");
+//  }
+//  } catch (err) {
+//  setError("Error fetching workspaces.");
+//  } finally {
+//  setLoadingWorkspaces(false);
+//  }
+//  };
+//  fetchWorkspaces();
+//  }, [supabase_id]);
+
+//  // Fetch conversations when a workspace is selected
+//  useEffect(() => {
+//  if (!selectedWorkspace) return;
+
+//  const fetchConversations = async () => {
+//  setLoadingConversations(true);
+//  setConversations([]);
+//  setError("");
+//  try {
+//  const res = await fetch(
+//  `/api/conversations/get?workspaceId=${selectedWorkspace.workspace_id}`
+//  );
+//  const data = await res.json();
+//  console.log('data from conversations', data)
+//  if (data.success) {
+//  setConversations(data.conversations);
+//  } else {
+//  setError("Failed to load conversations.");
+//  }
+//  } catch (err) {
+//  setError("Error fetching conversations.");
+//  } finally {
+//  setLoadingConversations(false);
+//  }
+//  };
+//  fetchConversations();
+//  }, [selectedWorkspace]);
+
+//  if (!supabase_id) {
+//  return (
+//  <div className="flex-1 flex items-center justify-center min-h-[50vh] bg-gray-50 [#0a0a0a]">
+//  <div className="flex flex-col items-center gap-4">
+//  <div className="relative w-10 h-10">
+//  <div className="absolute inset-0 rounded-full border-2 border-gray-200 " />
+//  <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-black animate-spin" />
+//  </div>
+//  <p className="text-xs font-medium text-gray-400 tracking-wider uppercase">
+//  Loading
+//  </p>
+//  </div>
+//  </div>
+//  );
+//  }
+
+//  // ── No workspaces found ────────────────────────────────────────────────────
+//  if (!loadingWorkspaces && workspaces.length === 0) {
+//  return (
+//  <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+//  <div className="text-5xl mb-4">💬</div>
+//  <h2 className="text-xl font-semibold text-gray-800 mb-2">No Workspaces Found</h2>
+//  <p className="text-gray-500 mb-6 text-sm">
+//  Please configure a workspace before viewing conversations.
+//  </p>
+//  <Link
+//  href="/dashboard/settings/whatsapp"
+//  className="bg-black text-white px-5 py-2 rounded-md text-sm hover:bg-gray-800 transition-colors"
+//  >
+//  Go to Settings
+//  </Link>
+//  </div>
+//  );
+//  }
+// // Paste this return() into your Conversations list component
+//  return (
+//  <div className="flex flex-col h-full bg-gray-50 [#0a0a0a]">
+
+//  {/* Header */}
+//  <header className="px-6 py-4 border-b border-gray-200 bg-white [#111] flex items-center gap-4 flex-wrap shrink-0">
+//  <h1 className="text-xl font-bold text-gray-900 tracking-tight">
+//  Conversations
+//  </h1>
+
+//  {/* Workspace Selector */}
+//  <div className="flex items-center gap-2.5 ml-auto flex-wrap">
+//  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+//  Workspace
+//  </span>
+//  {loadingWorkspaces ? (
+//  <div className="h-9 w-44 bg-gray-100 rounded-xl animate-pulse" />
+//  ) : (
+//  <select
+//  value={selectedWorkspace?.workspace_id || ""}
+//  onChange={(e) => {
+//  const ws = workspaces.find((w) => w.workspace_id === e.target.value);
+//  setSelectedWorkspace(ws || null);
+//  }}
+//  className="h-9 px-3 rounded-xl border border-gray-200 bg-white [#0a0a0a] text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-black :ring-white transition-all"
+//  >
+//  <option value="">Select workspace…</option>
+//  {workspaces.map((ws) => (
+//  <option key={ws.workspace_id} value={ws.workspace_id}>
+//  {ws.company_name}
+//  </option>
+//  ))}
+//  </select>
+//  )}
+//  </div>
+//  </header>
+
+//  {/* Body */}
+//  <div className="flex-1 overflow-auto p-4 sm:p-6">
+//  <div className="max-w-3xl mx-auto w-full">
+
+//  {/* No workspace selected */}
+//  {!selectedWorkspace && !loadingWorkspaces && (
+//  <div className="text-center py-24">
+//  <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+//  <span className="text-2xl">🏢</span>
+//  </div>
+//  <p className="font-semibold text-gray-700 ">No workspace selected</p>
+//  <p className="text-sm text-gray-400 mt-1">
+//  Choose a workspace above to view its conversations.
+//  </p>
+//  </div>
+//  )}
+
+//  {/* Loading */}
+//  {selectedWorkspace && loadingConversations && (
+//  <div className="space-y-2">
+//  {[...Array(5)].map((_, i) => (
+//  <div key={i} className="bg-white [#111] rounded-2xl border border-gray-200 p-4 animate-pulse">
+//  <div className="h-3.5 bg-gray-200 rounded-lg w-1/3 mb-2" />
+//  <div className="h-2.5 bg-gray-100 rounded-lg w-1/4" />
+//  </div>
+//  ))}
+//  </div>
+//  )}
+
+//  {/* Error */}
+//  {error && (
+//  <div className="text-center py-10 text-red-500 text-sm">{error}</div>
+//  )}
+
+//  {/* Conversations */}
+//  {selectedWorkspace && !loadingConversations && !error && (
+//  conversations.length === 0 ? (
+//  <div className="text-center py-24">
+//  <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+//  <span className="text-2xl">📭</span>
+//  </div>
+//  <p className="font-semibold text-gray-700 ">No conversations yet</p>
+//  <p className="text-sm text-gray-400 mt-1">
+//  When customers message your WhatsApp number, they'll appear here.
+//  </p>
+//  </div>
+//  ) : (
+//  <div className="space-y-2">
+//  {conversations.map((conv) => (
+//  <Link
+//  key={conv._id}
+//  href={`/dashboard/conversations/${conv._id}`}
+//  className="flex justify-between items-center bg-white [#111] border border-gray-200 rounded-2xl p-4 hover:border-gray-300 :border-gray-600 hover:shadow-sm transition-all duration-150 group"
+//  >
+//  <div className="flex items-center gap-3">
+//  <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center text-sm font-bold text-gray-600 shrink-0">
+//  {conv.phone?.slice(-2)}
+//  </div>
+//  <div>
+//  <h3 className="font-semibold text-gray-900 text-sm">{conv.phone}</h3>
+//  <p className="text-xs text-gray-400 mt-0.5">
+//  Started {new Date(conv.created_at).toLocaleDateString()}
+//  </p>
+//  </div>
+//  </div>
+//  <div className="text-xs text-gray-400 shrink-0 ml-4">
+//  {new Date(conv.last_message_at).toLocaleString([], {
+//  month: 'short', day: 'numeric',
+//  hour: '2-digit', minute: '2-digit'
+//  })}
+//  </div>
+//  </Link>
+//  ))}
+//  </div>
+//  )
+//  )}
+
+//  </div>
+//  </div>
+//  </div>
+//  );
  // return (
  // <div className="flex flex-col h-full">
  // {/* Header */}
@@ -317,7 +474,7 @@ export default function ConversationsPage() {
  // </div>
  // </div>
  // );
-}
+// }
 
 
 // import dbConnect from '@/lib/mongodb';

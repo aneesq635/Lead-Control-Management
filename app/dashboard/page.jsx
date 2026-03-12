@@ -4,60 +4,53 @@ import { MessageSquare, Users, TrendingUp, Zap, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 const stats = [
- { label: 'Total Conversations', value: '1,284', change: '+12%', icon: MessageSquare },
- { label: 'Active Leads', value: '348', change: '+8%', icon: Users },
- { label: 'Conversion Rate', value: '24.6%', change: '+3.2%', icon: TrendingUp },
- { label: 'AI Responses', value: '9,410', change: '+21%', icon: Zap },
+    { label: 'Total Conversations', value: '1,284', change: '+12%', icon: MessageSquare },
+    { label: 'Active Leads', value: '348', change: '+8%', icon: Users },
+    { label: 'Conversion Rate', value: '24.6%', change: '+3.2%', icon: TrendingUp },
+    { label: 'AI Responses', value: '9,410', change: '+21%', icon: Zap },
 ];
 
 export default function DashboardPage() {
- const router = useRouter()
- return (
- <div className="flex-1 p-8 bg-gray-50 [#0a0a0a] min-h-screen">
+    const router = useRouter()
+    return (
+        <div className="flex-1 p-8 bg-gray-50 [#0a0a0a] min-h-screen">
 
- {/* Header */}
- <div className="flex items-center justify-between mb-8">
- <div>
- <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
- Dashboard
- </h1>
- <p className="text-sm text-gray-500 mt-1">
- Welcome back — here's what's happening today.
- </p>
- </div>
- <button
- onClick={() => router.push("/workspace/create")}
- className="flex items-center gap-2 h-10 px-4 bg-black hover:bg-gray-800 :bg-gray-100 text-white rounded-xl text-sm font-semibold transition-all duration-200 active:scale-[0.98] shrink-0 cursor-pointer"
- >
- <Plus className="w-4 h-4" />
- New Workspace
- </button>
- </div>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-8">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+                        Dashboard
+                    </h1>
+                    <p className="text-sm text-gray-500 mt-1">
+                        Welcome back — here's what's happening today.
+                    </p>
+                </div>
+            </div>
 
- {/* Stats Grid */}
- <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
- {stats.map(({ label, value, change, icon: Icon }) => (
- <div
- key={label}
- className="bg-white [#111] border border-gray-200 rounded-2xl p-5 flex flex-col gap-4"
- >
- <div className="flex items-center justify-between">
- <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center">
- <Icon className="w-4 h-4 text-gray-600 " />
- </div>
- <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
- {change}
- </span>
- </div>
- <div>
- <p className="text-2xl font-bold text-gray-900 tracking-tight">{value}</p>
- <p className="text-xs text-gray-500 mt-0.5">{label}</p>
- </div>
- </div>
- ))}
- </div>
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+                {stats.map(({ label, value, change, icon: Icon }) => (
+                    <div
+                        key={label}
+                        className="bg-white [#111] border border-gray-200 rounded-2xl p-5 flex flex-col gap-4"
+                    >
+                        <div className="flex items-center justify-between">
+                            <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center">
+                                <Icon className="w-4 h-4 text-gray-600 " />
+                            </div>
+                            <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                                {change}
+                            </span>
+                        </div>
+                        <div>
+                            <p className="text-2xl font-bold text-gray-900 tracking-tight">{value}</p>
+                            <p className="text-xs text-gray-500 mt-0.5">{label}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
 
- {/* Quick Actions
+            {/* Quick Actions
  <div className="bg-white [#111] border border-gray-200 rounded-2xl p-6">
  <h2 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wider">
  Quick Start
@@ -90,6 +83,6 @@ export default function DashboardPage() {
  </div>
  </div> */}
 
- </div>
- );
+        </div>
+    );
 }
