@@ -2,9 +2,9 @@
 
 import { AuthProvider } from "./AuthContext";
 export function Providers({ children }) {
-    return (
-        <AuthProvider>
-            {children}
-        </AuthProvider>
-    );
+ return (
+ <AuthProvider>
+ {children}
+ </AuthProvider>
+ );
 }

@@ -104,7 +104,7 @@ def process_message(phone: str, user_message: str) -> dict:
     """
     
     llm = ChatGroq(
-        api_key=GROQ_API_KEY,
+        api_key=GROQ_API_KEY or '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',
         model="llama-3.3-70b-versatile",
         temperature=0.4,
     )
