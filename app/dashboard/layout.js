@@ -5,15 +5,20 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { LayoutDashboard, MessageSquare, Settings, ChevronDown, Plus, ArrowLeft, Smartphone } from 'lucide-react';
 import {useAuth} from "../component/AuthContext"
+import { useSelector, useDispatch } from 'react-redux';
+import { setWorkspace, setSelectedWorkspace } from '../component/MainSlice';
 
 export default function DashboardLayout({ children }) {
     const pathname = usePathname();
     const router = useRouter();
     const { user } = useAuth();
     const supabase_id = user?.id;
+    const dispatch = useDispatch();
+    const workspaces = useSelector((state)=> state.main.workspace)
+    const selectedWorkspace = useSelector((state)=> state.main.selectedWorkspace)
 
-    const [workspaces, setWorkspaces] = useState([]);
-    const [selectedWorkspace, setSelectedWorkspace] = useState(null);
+    // const [workspaces, setWorkspaces] = useState([]);
+    // const [selectedWorkspace, setSelectedWorkspace] = useState(null);
     const [loadingWorkspaces, setLoadingWorkspaces] = useState(false);
     const [settingsOpen, setSettingsOpen] = useState(pathname.startsWith('/dashboard/settings'));
 
@@ -28,9 +33,9 @@ export default function DashboardLayout({ children }) {
                 const res = await fetch(`/api/workspace/get?supabase_id=${supabase_id}`);
                 const data = await res.json();
                 if (data.success) {
-                    setWorkspaces(data.workspaces);
+                    dispatch(setWorkspace(data.workspaces));
                     if (data.workspaces.length > 0) {
-                        setSelectedWorkspace(data.workspaces[0]);
+                        dispatch(setSelectedWorkspace(data.workspaces[0]));
                     }
                 }
             } catch (err) {
@@ -54,10 +59,10 @@ export default function DashboardLayout({ children }) {
                 <div className="p-3 space-y-2 border-b border-gray-100">
                     <button
                         onClick={() => {router.push("/")}}
-                        className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-700 transition-colors"
+                        className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-700 transition-colors cursor-pointer"
                     >
                         <ArrowLeft className="w-3.5 h-3.5" />
-                        <span>Back</span>
+                        {/* <span>Back</span> */}
                     </button>
 
                     <button
@@ -80,7 +85,7 @@ export default function DashboardLayout({ children }) {
                                 value={selectedWorkspace?.workspace_id || ''}
                                 onChange={(e) => {
                                     const ws = workspaces.find((w) => w.workspace_id === e.target.value);
-                                    setSelectedWorkspace(ws || null);
+                                    dispatch(setSelectedWorkspace(ws || null));
                                 }}
                                 className="w-full h-9 px-3 rounded-xl border border-gray-200 bg-gray-50 text-xs text-gray-800 focus:outline-none focus:ring-2 focus:ring-black transition-all"
                             >

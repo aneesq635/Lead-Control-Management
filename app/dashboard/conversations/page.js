@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../component/AuthContext";
 import Link from "next/link";
+import { useSelector } from "react-redux";
+
 
 // selectedWorkspace will be passed via props for now
 // (later replace with state management / context)
@@ -13,8 +15,7 @@ export default function ConversationsPage({ selectedWorkspace: propWorkspace }) 
     const { user } = useAuth();
     const supabase_id = user?.id;
 
-    // Use prop workspace if provided (from layout via context later)
-    const selectedWorkspace = propWorkspace || null;
+    const selectedWorkspace = useSelector((state)=> state.main.selectedWorkspace)
 
     // Fetch conversations when a workspace is selected
     useEffect(() => {
