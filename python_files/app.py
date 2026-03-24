@@ -23,6 +23,7 @@ def receive_message():
         }), 400
 
     result = process_message(phone, message)
+    print("result", result)
 
     return jsonify({
         "success": True,
