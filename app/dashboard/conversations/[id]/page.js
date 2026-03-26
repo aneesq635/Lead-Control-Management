@@ -38,18 +38,15 @@ export default function ConversationThreadPage() {
 
     // ── Socket.io: only handles INCOMING messages ────────────────────────────
     // ── Socket.io: only handles INCOMING messages ────────────────────────────
-const handleSocketMessage = useCallback((newMessage) => {
-    console.log("newMessage", newMessage)
-    // REMOVE THIS LINE ❌:
-    // if (newMessage.direction !== 'incoming') return;
-    
-    // REPLACE WITH THIS ✅ — duplicate check karo _id se
-    setMessages((prev) => {
-        const alreadyExists = prev.some((m) => m._id === newMessage._id);
-        if (alreadyExists) return prev;
-        return [...prev, newMessage];
-    });
-}, []);
+    const handleSocketMessage = useCallback((newMessage) => {
+        console.log("newMessage", newMessage)
+
+        setMessages((prev) => {
+            const alreadyExists = prev.some((m) => m._id === newMessage._id);
+            if (alreadyExists) return prev;
+            return [...prev, newMessage];
+        });
+    }, []);
 
     const { connected } = useConversationSocket(id, handleSocketMessage);
 
@@ -174,8 +171,8 @@ const handleSocketMessage = useCallback((newMessage) => {
                 {/* Live connection badge */}
                 <div
                     className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all ${connected
-                            ? 'bg-green-50 text-green-600 '
-                            : 'bg-gray-100 text-gray-400 '
+                        ? 'bg-green-50 text-green-600 '
+                        : 'bg-gray-100 text-gray-400 '
                         }`}
                     title={connected ? 'Real-time active' : 'Connecting...'}
                 >
@@ -203,8 +200,8 @@ const handleSocketMessage = useCallback((newMessage) => {
                             >
                                 <div
                                     className={`max-w-[78%] sm:max-w-[65%] rounded-2xl px-4 py-2.5 ${isIncoming
-                                            ? 'bg-white [#111] text-gray-900 border border-gray-100 rounded-tl-sm shadow-sm'
-                                            : 'bg-black text-white rounded-tr-sm shadow-sm'
+                                        ? 'bg-white [#111] text-gray-900 border border-gray-100 rounded-tl-sm shadow-sm'
+                                        : 'bg-black text-white rounded-tr-sm shadow-sm'
                                         }`}
                                 >
                                     <p className="text-sm whitespace-pre-wrap leading-relaxed">
