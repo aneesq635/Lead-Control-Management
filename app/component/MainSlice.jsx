@@ -4,6 +4,10 @@ const initialState = {
     theme: "dark",
     workspace: [],
     selectedWorkspace: null,
+    leads: [],
+    conversations:[],
+    allMessages:[],
+
 }
 
 const main = createSlice({
@@ -19,8 +23,17 @@ const main = createSlice({
         setSelectedWorkspace: (state, action) => {
             state.selectedWorkspace = action.payload;
         },
+        setLeads: (state, action) => {
+            state.leads = action.payload;
+        },
+        setConversation: (state, action)=>{
+            state.conversations = action.payload;
+        },
+        setAllMessages: (state,action)=>{
+            state.allMessages = action.payload
+        }
     }
 })
 
-export const {setTheme, setSelectedWorkspace, setWorkspace} = main.actions;
+export const {setTheme, setSelectedWorkspace, setWorkspace, setLeads, setConversation, setAllMessages} = main.actions;
 export default main.reducer;

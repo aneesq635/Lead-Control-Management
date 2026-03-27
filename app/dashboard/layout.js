@@ -4,48 +4,24 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { LayoutDashboard, MessageSquare, Settings, ChevronDown, Plus, ArrowLeft, Smartphone } from 'lucide-react';
-import {useAuth} from "../component/AuthContext"
 import { useSelector, useDispatch } from 'react-redux';
-import { setWorkspace, setSelectedWorkspace } from '../component/MainSlice';
+import { setSelectedWorkspace } from '../component/MainSlice';
 
 export default function DashboardLayout({ children }) {
     const pathname = usePathname();
     const router = useRouter();
-    const { user } = useAuth();
-    const supabase_id = user?.id;
     const dispatch = useDispatch();
     const workspaces = useSelector((state)=> state.main.workspace)
     const selectedWorkspace = useSelector((state)=> state.main.selectedWorkspace)
-
-    // const [workspaces, setWorkspaces] = useState([]);
-    // const [selectedWorkspace, setSelectedWorkspace] = useState(null);
-    const [loadingWorkspaces, setLoadingWorkspaces] = useState(false);
+    const [loadingWorkspaces, setLoadingWorkspaces] = useState(true);
     const [settingsOpen, setSettingsOpen] = useState(pathname.startsWith('/dashboard/settings'));
 
     const isActive = (href) => pathname === href;
     const isGroupActive = (prefix) => pathname.startsWith(prefix);
 
-    useEffect(() => {
-        if (!supabase_id) return;
-        const fetchWorkspaces = async () => {
-            setLoadingWorkspaces(true);
-            try {
-                const res = await fetch(`/api/workspace/get?supabase_id=${supabase_id}`);
-                const data = await res.json();
-                if (data.success) {
-                    dispatch(setWorkspace(data.workspaces));
-                    if (data.workspaces.length > 0) {
-                        dispatch(setSelectedWorkspace(data.workspaces[0]));
-                    }
-                }
-            } catch (err) {
-                console.error('Error fetching workspaces:', err);
-            } finally {
-                setLoadingWorkspaces(false);
-            }
-        };
-        fetchWorkspaces();
-    }, [supabase_id]);
+    useEffect(()=>{if(workspaces){
+        setLoadingWorkspaces(false)
+    }},[workspaces])
 
     const settingsLinks = [
         { href: '/dashboard/settings/whatsapp', label: 'WhatsApp', icon: Smartphone },

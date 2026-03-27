@@ -5,19 +5,26 @@ import Link from 'next/link';
 import { ArrowLeft, Send, Wifi, WifiOff } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useConversationSocket } from '@/lib/socket/client';
+import { useSelector } from 'react-redux';
 
 export default function ConversationThreadPage() {
     const params = useParams();
     const id = params?.id;
 
-    const [conversation, setConversation] = useState(null);
-    const [messages, setMessages] = useState([]);
+    const conversations = useSelector((state)=> state.main.conversations);
+    const conversation = conversations.find((conv)=> conv._id === id);
+    const selectedWorkspace = useSelector((state)=> state.main.selectedWorkspace);
+    
     const [workspace, setWorkspace] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [messageText, setMessageText] = useState("");
     const [sending, setSending] = useState(false);
-
+    const allMessages = useSelector((state)=> state.main.allMessages);
+    const currentmessages = allMessages.filter((msg)=> msg.conversation_id === id);
+    const [messages, setMessages] = useState(currentmessages);
+    console.log("allMessages",allMessages)
+    console.log("current messages", currentmessages)
     // ── Scroll refs ───────────────────────────────────────────────────────────
     // bottomRef: a sentinel <div> sitting below the last message.
     // Calling bottomRef.current.scrollIntoView() is more reliable than
@@ -38,6 +45,9 @@ export default function ConversationThreadPage() {
 
     // ── Socket.io: only handles INCOMING messages ────────────────────────────
     // ── Socket.io: only handles INCOMING messages ────────────────────────────
+    useEffect(()=>{
+            setLoading(false)
+    ,[allMessages]})
     const handleSocketMessage = useCallback((newMessage) => {
         console.log("newMessage", newMessage)
 
@@ -50,34 +60,7 @@ export default function ConversationThreadPage() {
 
     const { connected } = useConversationSocket(id, handleSocketMessage);
 
-    // ── Initial data fetch ────────────────────────────────────────────────────
-    useEffect(() => {
-        if (!id) return;
-
-        const fetchConversationDetails = async () => {
-            setLoading(true);
-            isInitialLoad.current = true; // mark: next scroll should be instant
-            try {
-                const res = await fetch(`/api/conversations/${id}`);
-                const data = await res.json();
-
-                if (data.success) {
-                    setConversation(data.conversation);
-                    setWorkspace(data.workspace);
-                    setMessages(data.messages || []);
-                } else {
-                    setError(data.error || "Failed to load conversation");
-                }
-            } catch (err) {
-                setError("Error fetching conversation details.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchConversationDetails();
-    }, [id]);
-
+  
     // ── Auto-scroll ───────────────────────────────────────────────────────────
     // Fires whenever messages change OR the typing indicator appears/disappears.
     // Using scrollIntoView on the sentinel div is the standard React chat pattern:
@@ -164,7 +147,7 @@ export default function ConversationThreadPage() {
                         {conversation.phone}
                     </h1>
                     <p className="text-[11px] text-gray-400 ">
-                        {workspace?.company_name}
+                        {selectedWorkspace?.company_name}
                     </p>
                 </div>
 

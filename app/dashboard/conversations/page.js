@@ -4,45 +4,22 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../component/AuthContext";
 import Link from "next/link";
 import { useSelector } from "react-redux";
+import { setConversation } from "@/app/component/MainSlice";
 
-
-// selectedWorkspace will be passed via props for now
-// (later replace with state management / context)
-export default function ConversationsPage({ selectedWorkspace: propWorkspace }) {
-    const [conversations, setConversations] = useState([]);
-    const [loadingConversations, setLoadingConversations] = useState(false);
+export default function ConversationsPage() {
+    const [loadingConversations, setLoadingConversations] = useState(true);
     const [error, setError] = useState("");
     const { user } = useAuth();
     const supabase_id = user?.id;
 
     const selectedWorkspace = useSelector((state)=> state.main.selectedWorkspace)
+    const conversations = useSelector((state)=> state.main.conversations)
 
-    // Fetch conversations when a workspace is selected
-    useEffect(() => {
-        if (!selectedWorkspace) return;
-
-        const fetchConversations = async () => {
-            setLoadingConversations(true);
-            setConversations([]);
-            setError("");
-            try {
-                const res = await fetch(
-                    `/api/conversations/get?workspaceId=${selectedWorkspace.workspace_id}`
-                );
-                const data = await res.json();
-                if (data.success) {
-                    setConversations(data.conversations);
-                } else {
-                    setError("Failed to load conversations.");
-                }
-            } catch (err) {
-                setError("Error fetching conversations.");
-            } finally {
-                setLoadingConversations(false);
-            }
-        };
-        fetchConversations();
-    }, [selectedWorkspace]);
+    useEffect(()=>{
+        if(conversations){
+        setLoadingConversations(false)
+    }
+    },[conversations])
 
     // Still loading auth
     if (!supabase_id) {

@@ -9,14 +9,16 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
   BarChart, Bar
 } from 'recharts'
+import { useSelector, useDispatch } from 'react-redux'
+import { setLeads } from '../component/MainSlice'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const STATUS_META = {
-  hot:  { color: '#ef4444', bg: 'bg-red-50',    text: 'text-red-600',    label: 'Hot'  },
-  warm: { color: '#f59e0b', bg: 'bg-amber-50',  text: 'text-amber-600',  label: 'Warm' },
-  cold: { color: '#3b82f6', bg: 'bg-blue-50',   text: 'text-blue-600',   label: 'Cold' },
-  new:  { color: '#8b5cf6', bg: 'bg-violet-50', text: 'text-violet-600', label: 'New'  },
+  hot: { color: '#ef4444', bg: 'bg-red-50', text: 'text-red-600', label: 'Hot' },
+  warm: { color: '#f59e0b', bg: 'bg-amber-50', text: 'text-amber-600', label: 'Warm' },
+  cold: { color: '#3b82f6', bg: 'bg-blue-50', text: 'text-blue-600', label: 'Cold' },
+  new: { color: '#8b5cf6', bg: 'bg-violet-50', text: 'text-violet-600', label: 'New' },
 }
 
 const PIE_COLORS = ['#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6', '#10b981']
@@ -138,15 +140,15 @@ function PropertyTypeChart({ data }) {
 const PAGE_SIZE = 8
 
 function LeadsTable({ leads }) {
-  const [query, setQuery]   = useState('')
+  const [query, setQuery] = useState('')
   const [status, setStatus] = useState('all')
-  const [page, setPage]     = useState(1)
+  const [page, setPage] = useState(1)
 
   const filtered = useMemo(() => {
     return leads.filter(l => {
-      const name  = l.lead_data?.name?.toLowerCase() || ''
+      const name = l.lead_data?.name?.toLowerCase() || ''
       const phone = l.phone?.toLowerCase() || ''
-      const q     = query.toLowerCase()
+      const q = query.toLowerCase()
       const matchQ = !q || name.includes(q) || phone.includes(q)
       const matchS = status === 'all' || l.lead_status === status
       return matchQ && matchS
@@ -184,7 +186,7 @@ function LeadsTable({ leads }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-gray-50 text-left">
-              {['Name','Phone','Area','Budget','Property','Status','Score','Follow-up','Created'].map(h => (
+              {['Name', 'Phone', 'Area', 'Budget', 'Property', 'Status', 'Score', 'Follow-up', 'Created'].map(h => (
                 <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
               ))}
             </tr>
@@ -236,32 +238,40 @@ function LeadsTable({ leads }) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
-  const [leads, setLeads]   = useState([])
+  // const [leads, setLeads]   = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError]   = useState(null)
+  const [error, setError] = useState(null)
+  const leads = useSelector(state => state.main.leads)
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    // If leads exist, we stop loading. Even if they are empty, DataLoader sets it to [] which is truthy.
+    if (leads) {
+      setLoading(false)
+    }
+  }, [leads])
 
   const fetchLeads = async () => {
     try {
       setLoading(true)
-      const res  = await fetch('/api/dashboard/stats')
+      const res = await fetch('/api/dashboard/stats')
       if (!res.ok) throw new Error('Failed to fetch leads')
       const data = await res.json()
-      setLeads(data.leads || [])
+      dispatch(setLeads(data.leads || []))
     } catch (e) {
+      console.log("error while fetching lead", e.message)
       setError(e.message)
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => { fetchLeads() }, [])
-
   // ── Derived stats ──
   const stats = useMemo(() => {
-    const total    = leads.length
-    const hot      = leads.filter(l => l.lead_status === 'hot').length
-    const warm     = leads.filter(l => l.lead_status === 'warm').length
-    const cold     = leads.filter(l => l.lead_status === 'cold').length
+    const total = leads.length
+    const hot = leads.filter(l => l.lead_status === 'hot').length
+    const warm = leads.filter(l => l.lead_status === 'warm').length
+    const cold = leads.filter(l => l.lead_status === 'cold').length
     const followup = leads.filter(l => l.needs_human_followup).length
     return { total, hot, warm, cold, followup }
   }, [leads])
@@ -337,11 +347,11 @@ export default function DashboardPage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-        <KpiCard label="Total Leads"    value={stats.total}   icon={Users}       color="bg-indigo-50 text-indigo-500" />
-        <KpiCard label="Hot Leads"      value={stats.hot}     icon={Flame}       color="bg-red-50 text-red-500" />
-        <KpiCard label="Warm Leads"     value={stats.warm}    icon={Thermometer} color="bg-amber-50 text-amber-500" />
-        <KpiCard label="Cold Leads"     value={stats.cold}    icon={Snowflake}   color="bg-blue-50 text-blue-500" />
-        <KpiCard label="Need Follow-up" value={stats.followup} icon={Bell}       color="bg-rose-50 text-rose-500" sub="Needs human review" />
+        <KpiCard label="Total Leads" value={stats.total} icon={Users} color="bg-indigo-50 text-indigo-500" />
+        <KpiCard label="Hot Leads" value={stats.hot} icon={Flame} color="bg-red-50 text-red-500" />
+        <KpiCard label="Warm Leads" value={stats.warm} icon={Thermometer} color="bg-amber-50 text-amber-500" />
+        <KpiCard label="Cold Leads" value={stats.cold} icon={Snowflake} color="bg-blue-50 text-blue-500" />
+        <KpiCard label="Need Follow-up" value={stats.followup} icon={Bell} color="bg-rose-50 text-rose-500" sub="Needs human review" />
       </div>
 
       {/* Charts Row 1 */}
