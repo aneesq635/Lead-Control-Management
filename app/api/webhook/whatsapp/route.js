@@ -55,6 +55,9 @@ export async function POST(request) {
                 for (const change of entry.changes) {
                     if (change.value && change.value.messages && change.value.messages[0]) {
                         const phone_number_id = change.value.metadata.phone_number_id;
+                        //name in change.value.contacts[0].profile.name
+                        const name = change.value.contacts?.[0]?.profile?.name || '';
+                        console.log("name", name)
                         const message = change.value.messages[0];
                         const contact = change.value.contacts?.[0];
 
@@ -92,11 +95,11 @@ export async function POST(request) {
                             conversation = await Conversation.create({
                                 workspace_id: workspace.workspace_id,
                                 phone: senderPhone,
+                                name:name,
                                 last_message_at: timestamp,
                                 created_at: new Date()
                             });
                         } else {
-                            // Update last message timestamp
                             conversation.last_message_at = timestamp;
                             await conversation.save();
                         }
@@ -129,6 +132,7 @@ export async function POST(request) {
                             emitConversationUpdated(workspace.workspace_id, {
                                 _id: conversation._id,
                                 phone: conversation.phone,
+                                name: conversation.name,
                                 last_message_at: conversation.last_message_at,
                                 workspace_id: conversation.workspace_id,
                             });
@@ -179,6 +183,7 @@ export async function POST(request) {
                                                         workspace_id: workspace.workspace_id,
                                                         conversation_id: conversation._id,
                                                         phone: senderPhone,
+                                                        name: conversation.name,
                                                         lead_data: mergedLeadData,
                                                         lead_score: newScore,
                                                         lead_status: agentData.lead_status || 'cold',
@@ -216,6 +221,7 @@ export async function POST(request) {
                                                 emitConversationUpdated(workspace.workspace_id, {
                                                     _id: conversation._id,
                                                     phone: conversation.phone,
+                                                    name: conversation.name,
                                                     last_message_at: conversation.last_message_at,
                                                     workspace_id: conversation.workspace_id,
                                                 });

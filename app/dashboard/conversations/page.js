@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../component/AuthContext";
 import Link from "next/link";
-import { useSelector } from "react-redux";
-import { setConversation } from "@/app/component/MainSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { setConversation, deleConversation } from "@/app/component/MainSlice";
+import {Trash2} from "lucide-react"
 
 export default function ConversationsPage() {
     const [loadingConversations, setLoadingConversations] = useState(true);
@@ -14,12 +15,33 @@ export default function ConversationsPage() {
 
     const selectedWorkspace = useSelector((state)=> state.main.selectedWorkspace)
     const conversations = useSelector((state)=> state.main.conversations)
+    const leads = useSelector((state)=> state.main.leads)
+    const currentLead = leads.filter((lead)=>lead.workspace_id === selectedWorkspace.workspace_id)
+    console.log("currentLead", currentLead)
+    console.log("conversations", conversations)
+    const dispatch =  useDispatch()
 
     useEffect(()=>{
         if(conversations){
         setLoadingConversations(false)
     }
     },[conversations])
+    const  handleDelete =async (id)=>{
+        try{
+            const response = await fetch(`/api/conversations/delete?id=${id}`,{
+                method:"DELETE",
+                headers:{
+                    "Content-Type":"application/json"
+                }
+            })
+            const data = await response.json()
+            if(data.success){
+                dispatch(deleConversation(id))
+            }
+        }catch(error){
+            console.log(error)
+        }
+    }
 
     // Still loading auth
     if (!supabase_id) {
@@ -106,10 +128,10 @@ export default function ConversationsPage() {
                                     >
                                         <div className="flex items-center gap-3">
                                             <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center text-sm font-bold text-gray-600 shrink-0">
-                                                {conv.phone?.slice(-2)}
+                                                {conv.name?.slice(0,1).toUpperCase() || conv.phone?.slice(-2)}
                                             </div>
                                             <div>
-                                                <h3 className="font-semibold text-gray-900 text-sm">{conv.phone}</h3>
+                                                <h3 className="font-semibold text-gray-900 text-sm">{conv.name || conv.phone}</h3>
                                                 <p className="text-xs text-gray-400 mt-0.5">
                                                     Started {new Date(conv.created_at).toLocaleDateString()}
                                                 </p>
@@ -120,7 +142,18 @@ export default function ConversationsPage() {
                                                 month: 'short', day: 'numeric',
                                                 hour: '2-digit', minute: '2-digit'
                                             })}
+                                            <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                handleDelete(conv._id);
+                                            }}
+                                            className="text-red-500 hover:text-red-700 ml-4 cursor-pointer"
+                                        >
+                                            <Trash2 size={16}/>
+                                        </button>
                                         </div>
+                                        
                                     </Link>
                                 ))}
                             </div>

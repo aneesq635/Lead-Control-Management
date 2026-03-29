@@ -13,6 +13,10 @@ const LeadSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    name:{
+      type: String,
+      default: "",
+    },
     phone: {
       type: String,
       required: true,

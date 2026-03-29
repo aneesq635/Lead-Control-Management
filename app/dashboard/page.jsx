@@ -157,14 +157,15 @@ function LeadsTable({ leads }) {
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const slice = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  console.log("leads", leads)
 
   return (
     <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row gap-3 p-5 border-b border-gray-100">
         <h3 className="text-sm font-semibold text-gray-700 self-center mr-auto">Recent Leads</h3>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <div className="relative ">
+          <Search className="absolute text-gray-600 left-3 top-1/2 -translate-y-1/2 w-4 h-4 " />
           <input
             value={query} onChange={e => { setQuery(e.target.value); setPage(1) }}
             placeholder="Search name or phone…"
@@ -172,7 +173,7 @@ function LeadsTable({ leads }) {
           />
         </div>
         <select value={status} onChange={e => { setStatus(e.target.value); setPage(1) }}
-          className="text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+          className="text-sm border text-black border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
           <option value="all">All Statuses</option>
           <option value="hot">Hot</option>
           <option value="warm">Warm</option>
@@ -196,7 +197,7 @@ function LeadsTable({ leads }) {
               <tr><td colSpan={9} className="text-center py-12 text-gray-400 text-sm">No leads found.</td></tr>
             ) : slice.map(lead => (
               <tr key={lead._id} className="hover:bg-gray-50/70 transition-colors">
-                <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">{lead.lead_data?.name || '—'}</td>
+                <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">{ lead.name|| '—'}</td>
                 <td className="px-4 py-3 text-gray-500">{lead.phone}</td>
                 <td className="px-4 py-3 text-gray-500">{lead.lead_data?.area || '—'}</td>
                 <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{lead.lead_data?.budget || '—'}</td>

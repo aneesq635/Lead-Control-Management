@@ -42,6 +42,24 @@ export default function ConversationThreadPage() {
     // Derived directly from the input value — no extra state needed.
     // True when the agent has typed something but not yet sent.
     const isTyping = messageText.trim().length > 0;
+    // fetch particular messages 
+    useEffect(()=>{
+        setLoading(true)
+        const fetchMessages = async () => {
+            try {
+                const res = await fetch(`/api/conversations/${id}`);
+                const data = await res.json();
+                if (data.success) {
+                    setMessages(data.messages);
+                }
+            } catch (error) {
+                console.error("Error fetching messages:", error);
+            }finally{
+                setLoading(false)
+            }
+        };
+        fetchMessages();
+    },[id])
 
     // ── Socket.io: only handles INCOMING messages ────────────────────────────
     // ── Socket.io: only handles INCOMING messages ────────────────────────────
@@ -140,18 +158,18 @@ export default function ConversationThreadPage() {
                 </Link>
                 <div className="w-px h-5 bg-gray-200 " />
                 <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center text-sm font-bold text-gray-600 shrink-0">
-                    {conversation.phone?.slice(-2)}
+                    {conversation.name?.slice(0,2)||conversation.phone?.slice(-2)}
                 </div>
                 <div className="flex-1">
                     <h1 className="text-sm font-bold text-gray-900 leading-tight">
-                        {conversation.phone}
+                        {conversation.name || conversation.phone}
                     </h1>
                     <p className="text-[11px] text-gray-400 ">
                         {selectedWorkspace?.company_name}
                     </p>
                 </div>
 
-                {/* Live connection badge */}
+                {/* Live connection badge
                 <div
                     className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all ${connected
                         ? 'bg-green-50 text-green-600 '
@@ -161,7 +179,7 @@ export default function ConversationThreadPage() {
                 >
                     {connected ? <Wifi size={11} /> : <WifiOff size={11} />}
                     {connected ? 'Live' : 'Offline'}
-                </div>
+                </div> */}
             </header>
 
             {/* Messages thread */}
