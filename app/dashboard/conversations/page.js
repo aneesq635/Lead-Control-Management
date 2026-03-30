@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../component/AuthContext";
 import Link from "next/link";
 import { useSelector, useDispatch } from "react-redux";
-import { setConversation, deleConversation } from "@/app/component/MainSlice";
+import { setConversation, deleConversation, setAddConversation } from "@/app/component/MainSlice";
 import {Trash2} from "lucide-react"
+import {useWorkspaceSocket} from "@/lib/socket/client"
+// import { useChartLayout } from "recharts/types/context/chartLayoutContext";
 
 export default function ConversationsPage() {
     const [loadingConversations, setLoadingConversations] = useState(true);
@@ -20,6 +22,7 @@ export default function ConversationsPage() {
     console.log("currentLead", currentLead)
     console.log("conversations", conversations)
     const dispatch =  useDispatch()
+
 
     useEffect(()=>{
         if(conversations){
@@ -42,8 +45,18 @@ export default function ConversationsPage() {
             console.log(error)
         }
     }
+    console.log("selected workspace,", selectedWorkspace)
+    const handleConversationUpdate =  useCallback((conversation)=>{
+        console.log("updating the conversation")
+          dispatch(setAddConversation(conversation))
+          console.log("converatino after updation", conversations)
 
-    // Still loading auth
+    })
+   
+    const {} = useWorkspaceSocket(selectedWorkspace.workspace_id, handleConversationUpdate)
+   
+    
+    // Still loading auths
     if (!supabase_id) {
         return (
             <div className="flex-1 flex items-center justify-center min-h-[50vh] bg-gray-50">

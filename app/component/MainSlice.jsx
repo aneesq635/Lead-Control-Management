@@ -38,9 +38,13 @@ const main = createSlice({
             state.conversations = state.conversations.filter((conv)=>conv._id !== id);
             state.leads = state.leads.filter((lead)=>lead.conversation_id !== id && lead.conversationId !== id);
             state.allMessages = state.allMessages.filter((msg)=>msg.conversation_id !== id && msg.conversationId !== id);
+        },
+        setAddConversation:(state,action)=>{
+            const newConversation = action.payload
+            state.conversations = [...state.conversations, newConversation]
         }
     }
 })
 
-export const {setTheme, setSelectedWorkspace, setWorkspace, setLeads, setConversation, setAllMessages, deleConversation} = main.actions;
+export const {setTheme, setSelectedWorkspace, setWorkspace, setLeads, setConversation, setAllMessages, deleConversation, setAddConversation} = main.actions;
 export default main.reducer;

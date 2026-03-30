@@ -5,7 +5,7 @@ import Conversation from '@/models/Conversation';
 import Message from '@/models/Message';
 import Lead from '@/models/Lead';
 import { send_whatsapp_message } from '@/lib/whatsapp';
-import { emitNewMessage, emitConversationUpdated } from '@/lib/socket/server';
+import { emitNewMessage, emitConversationUpdated, emitNewConversation } from '@/lib/socket/server';
 
 
 export async function GET(request) {
@@ -99,6 +99,7 @@ export async function POST(request) {
                                 last_message_at: timestamp,
                                 created_at: new Date()
                             });
+                            emitNewConversation(workspace.workspace_id, conversation)
                         } else {
                             conversation.last_message_at = timestamp;
                             await conversation.save();
