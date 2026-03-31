@@ -2,13 +2,15 @@
   "name": "lcm",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "node server.js",
     "build": "next build",
-    "start": "next start",
+    "start": "node server.js",
     "lint": "eslint"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.11.2",
     "@supabase/supabase-js": "^2.98.0",
     "lucide-react": "^0.575.0",
     "mongoose": "^9.2.3",
@@ -17,6 +19,10 @@
     "notistack": "^3.0.2",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-redux": "^9.2.0",
+    "recharts": "^3.8.1",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "supabase": "^2.76.17",
     "uuid": "^13.0.0",
     "zod": "^4.3.6"

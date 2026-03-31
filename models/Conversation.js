@@ -10,6 +10,10 @@ const conversationSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  name:{
+    type: String,
+    default:""
+  },
   last_message_at: {
     type: Date,
     default: Date.now,
