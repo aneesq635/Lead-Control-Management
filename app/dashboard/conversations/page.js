@@ -18,7 +18,7 @@ export default function ConversationsPage() {
     const selectedWorkspace = useSelector((state)=> state.main.selectedWorkspace)
     const conversations = useSelector((state)=> state.main.conversations)
     const leads = useSelector((state)=> state.main.leads)
-    const currentLead = leads.filter((lead)=>lead.workspace_id === selectedWorkspace.workspace_id)
+    const currentLead = leads.filter((lead)=>lead.workspace_id === selectedWorkspace?.workspace_id)
     console.log("currentLead", currentLead)
     console.log("conversations", conversations)
     const dispatch =  useDispatch()
@@ -53,7 +53,7 @@ export default function ConversationsPage() {
 
     })
    
-    const {} = useWorkspaceSocket(selectedWorkspace.workspace_id, handleConversationUpdate)
+    const {} = useWorkspaceSocket(selectedWorkspace?.workspace_id, handleConversationUpdate)
    
     
     // Still loading auths
