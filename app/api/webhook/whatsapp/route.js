@@ -15,8 +15,12 @@ export async function GET(request) {
     const token = searchParams.get('hub.verify_token');
     const challenge = searchParams.get('hub.challenge');
     console.log("webhook verify token", token);
-    console.log("webhook verify token in env", process.env.WEBHOOK_VERIFY_TOKEN)
-
+    //load token from mongodb not from env
+    await dbConnect();
+    const workspace = await Workspace.findOne({ whatsapp_verify_token: token });
+    const token_from_db = workspace?.whatsapp_verify_token;
+    // console.log("webhook verify token in env", process.env.WEBHOOK_VERIFY_TOKEN)
+    console.log("webhook verify token in mongodb", token_from_db)
     if (mode && token) {
         if (mode === 'subscribe') {
             await dbConnect();
@@ -25,9 +29,9 @@ export async function GET(request) {
             // In a multi-tenant system where each workspace might have its own verify token (if they configure their own Webhook)
             // or if there's a global one, we check if ANY workspace matches this token, or if it matches a global env var.
             // Based on the requirements, verify_token is stored per workspace.
-            const workspace = await Workspace.findOne({ whatsapp_verify_token: token });
 
-            if (workspace || token === process.env.WEBHOOK_VERIFY_TOKEN) {
+              
+            if (workspace || token === token_from_db) {
                 // Responds with the challenge token from the request
                 console.log('WEBHOOK_VERIFIED');
                 return new NextResponse(challenge, { status: 200 });

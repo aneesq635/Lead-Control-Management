@@ -97,7 +97,7 @@ export default function WhatsAppSettingsPage() {
     }
 
     return (
-        <div className="flex-1 p-6 sm:p-8 bg-gray-50 [#0a0a0a] min-h-full">
+        <div className="flex-1 p-6 sm:p-8 bg-gray-50 [#0a0a0a] min-h-full overflow-y-auto">
             <div className="max-w-3xl mx-auto w-full">
 
                 {/* Page Header */}
