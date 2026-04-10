@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, MessageSquare, Settings, ChevronDown, Plus, ArrowLeft, Smartphone } from 'lucide-react';
+import { LayoutDashboard, MessageSquare, Settings, ChevronDown, Plus, ArrowLeft, Smartphone, Database } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSelectedWorkspace } from '../component/MainSlice';
 
@@ -111,6 +111,23 @@ export default function DashboardLayout({ children }) {
                             <MessageSquare className="w-3.5 h-3.5" />
                         </div>
                         Conversations
+                    </Link>
+
+                    {/* RAG Knowledge Base */}
+                    <Link
+                        href="/dashboard/rag"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group ${
+                            isGroupActive('/dashboard/rag')
+                                ? 'bg-black text-white'
+                                : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                    >
+                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${
+                            isGroupActive('/dashboard/rag') ? 'bg-white/20' : 'bg-gray-100 group-hover:bg-gray-200'
+                        }`}>
+                            <Database className="w-3.5 h-3.5" />
+                        </div>
+                        Knowledge Base
                     </Link>
 
                 </nav>

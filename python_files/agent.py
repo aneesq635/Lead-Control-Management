@@ -4,16 +4,15 @@ import re
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from dotenv import load_dotenv
+from rag_module.services.rag_service import retrieve_relevant_docs
 
 load_dotenv()
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # ──────────────────────────────────────────────
 # System prompt for the Sales Agent
 # ──────────────────────────────────────────────
-
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-print(OPENAI_API_KEY)
-
 SYSTEM_PROMPT = """
 You are a professional Sales Assistant for a WhatsApp Lead Management & Automation System.
 Your job is to communicate with customers, collect lead information, qualify the lead, and help close deals faster.
@@ -22,6 +21,13 @@ Your job is to communicate with customers, collect lead information, qualify the
 - Professional, polite, friendly, helpful, concise, business-focused
 - Always sound like a human assistant, NEVER say "I am an AI" or "As an AI assistant"
 - Say things like: "Sure, I can help you with that."
+
+## Knowledge Base Context
+If a [KNOWLEDGE BASE] section is present at the top of the conversation context, it contains REAL business inventory and rules retrieved from the company database.
+- Use it to answer specific questions about available properties, pricing, sizes, areas, and rules.
+- If the customer asks "Do you have 5 marla house?" or "Available plots in DHA?" — check the knowledge base and answer specifically.
+- If the knowledge base has relevant information, reference it directly in your reply.
+- If the knowledge base is empty or not relevant, proceed normally.
 
 ## Conversation Flow (STRICT - Follow this exactly)
 
@@ -132,51 +138,66 @@ def get_or_create_session(phone: str) -> list:
     return sessions[phone]
 
 
-def process_message(phone: str, user_message: str) -> dict:
+def build_rag_context(user_message: str, workspace_id: str) -> str:
+    """
+    Query the RAG knowledge base and return a formatted context block.
+    Returns empty string if nothing relevant found.
+    """
+    try:
+        docs = retrieve_relevant_docs(user_message, workspace_id, top_k=4)
+        if not docs:
+            return ""
+        chunks = [d.page_content for d in docs]
+        context = "\n\n".join(chunks)
+        return f"[KNOWLEDGE BASE]\n{context}\n[/KNOWLEDGE BASE]\n\n"
+    except Exception as e:
+        print(f"RAG retrieval error: {e}")
+        return ""
+
+
+def process_message(phone: str, user_message: str, workspace_id: str = "default") -> dict:
     """
     Main entry point called by Flask routes.
-    Returns a dict with reply, lead_data, lead_score, lead_status, next_action, needs_human_followup.
+    1. Retrieves relevant RAG documents for the user's query.
+    2. Prepends them as context to the user message.
+    3. Calls LLM and returns structured JSON response.
     """
-
     llm = ChatOpenAI(
         api_key=OPENAI_API_KEY,
-        model="gpt-4o-mini",   # or "gpt-4o" / "gpt-3.5-turbo"
+        model="gpt-4o-mini",
         temperature=0.4,
     )
 
     history = get_or_create_session(phone)
-    history.append(HumanMessage(content=user_message))
+
+    # ── RAG: fetch relevant knowledge and prepend to user message ──
+    rag_context = build_rag_context(user_message, workspace_id)
+    augmented_message = rag_context + user_message if rag_context else user_message
+
+    history.append(HumanMessage(content=augmented_message))
 
     # Call OpenAI via LangChain
-    response = llm.invoke(history)
-    raw_content = response.content.strip()
+    response     = llm.invoke(history)
+    raw_content  = response.content.strip()
 
-    # Store assistant reply in memory
+    # Store assistant reply in memory (store clean reply not the augmented input)
     history.append(AIMessage(content=raw_content))
 
     print(raw_content)
 
     # Parse JSON response from agent
     try:
-        # Extract JSON object from response
         json_match = re.search(r"\{.*\}", raw_content, re.DOTALL)
-
         if json_match:
-            json_str = json_match.group()
-            result = json.loads(json_str)
+            result = json.loads(json_match.group())
         else:
             raise ValueError("No JSON found")
-
     except Exception:
         result = {
             "reply": raw_content,
             "lead_data": {
-                "name": None,
-                "budget": None,
-                "property_type": None,
-                "size": None,
-                "area": None,
-                "purpose": None,
+                "name": None, "budget": None, "property_type": None,
+                "size": None, "area": None, "purpose": None,
             },
             "lead_score": 0,
             "lead_status": "cold",
