@@ -21,13 +21,14 @@ export default function ConversationThreadPage() {
     // Find associated lead
     const currentLead = leads.find((l) => l.phone === conversation?.phone);
 
-    const [loading, setLoading] = useState(true);
+    const currentmessages = allMessages.filter((msg) => msg.conversation_id === id);
+
+    const [loading, setLoading] = useState(currentmessages.length === 0);
     const [error, setError] = useState("");
     const [messageText, setMessageText] = useState("");
     const [sending, setSending] = useState(false);
     const [detailsOpen, setDetailsOpen] = useState(false); // Toggle the 3rd right pane
 
-    const currentmessages = allMessages.filter((msg) => msg.conversation_id === id);
     const [messages, setMessages] = useState(currentmessages);
 
     const bottomRef = useRef(null);
@@ -36,7 +37,8 @@ export default function ConversationThreadPage() {
 
     useEffect(() => {
         if (!id) return;
-        setLoading(true);
+        // Only show spinner if we don't already have cached messages
+        if (messages.length === 0) setLoading(true);
         const fetchMessages = async () => {
             try {
                 const res = await fetch(`/api/conversations/${id}`);
@@ -111,7 +113,8 @@ export default function ConversationThreadPage() {
 
     if (loading) {
         return (
-            <div className="flex-1 flex justify-center items-center bg-gray-50 dark:bg-[#0a0a0a]">
+            // create some spinner
+            <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-[#0a0a0a]">
                 <div className="w-8 h-8 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
             </div>
         );
@@ -134,7 +137,7 @@ export default function ConversationThreadPage() {
         <div className="flex-1 flex flex-col md:flex-row h-full overflow-hidden relative">
             
             {/* Middle Pane: Chat Area */}
-            <div className={`flex-1 flex flex-col h-full bg-slate-50/50 dark:bg-[#0a0a0a] transition-all duration-300 ${detailsOpen ? 'mr-0 md:mr-80 lg:mr-96' : ''}`}>
+            <div className={`flex-1 flex flex-col h-full bg-slate-50/50 dark:bg-[#0a0a0a] transition-all duration-300 ${detailsOpen ? 'mr-80 lg:mr-96' : ''}`}>
                 <header className="px-4 py-3 border-b border-gray-200 dark:border-white/5 bg-white dark:bg-[#111] flex items-center gap-3 shrink-0 rounded-tl-xl md:rounded-none z-10 shadow-sm">
                     {/* Back button for mobile */}
                     <button
@@ -181,7 +184,7 @@ export default function ConversationThreadPage() {
                 {/* Chat Flow */}
                 <div className="flex-1 overflow-y-auto px-4 py-6 scroll-smooth bg-[#e9edef] dark:bg-transparent relative custom-scrollbar">
                     {/* Subtle chat background pattern for light mode only (WhatsApp style) */}
-                    <div className="absolute inset-0 opacity-[0.03] dark:hidden pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 100% 150%, #111 24%, #fff 25%, #fff 28%, #111 29%, #111 36%, #fff 36%, #fff 40%, transparent 40%, transparent), radial-gradient(circle at 0 150%, #111 24%, #fff 25%, #fff 28%, #111 29%, #111 36%, #fff 36%, #fff 40%, transparent 40%, transparent)', backgroundSize: '15px 15px' }} />
+                    {/* <div className="absolute inset-0 opacity-[0.03] dark:hidden pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 100% 150%, #111 24%, #fff 25%, #fff 28%, #111 29%, #111 36%, #fff 36%, #fff 40%, transparent 40%, transparent), radial-gradient(circle at 0 150%, #111 24%, #fff 25%, #fff 28%, #111 29%, #111 36%, #fff 36%, #fff 40%, transparent 40%, transparent)', backgroundSize: '15px 15px' }} /> */}
                     
                     <div className="max-w-3xl mx-auto flex flex-col space-y-4 relative z-10 w-full">
                         {messages.length === 0 && !isTyping && (
@@ -266,11 +269,11 @@ export default function ConversationThreadPage() {
 
             {/* Right Pane: Details Column (Togglable) */}
             <div className={`
-                absolute md:fixed top-0 right-0 h-full bg-white dark:bg-[#111] border-l border-gray-200 dark:border-white/5 
-                transition-transform duration-300 ease-in-out z-20 
-                w-full md:w-80 lg:w-96 shadow-2xl md:shadow-none
-                ${detailsOpen ? 'translate-x-0' : 'translate-x-full hidden md:block'}
-            `}>
+    absolute top-0 right-0 h-full bg-white dark:bg-[#111] border-l border-gray-200 dark:border-white/5 
+    transition-transform duration-300 ease-in-out z-20 
+    w-full md:w-80 lg:w-96 shadow-2xl
+    ${detailsOpen ? 'translate-x-0' : 'translate-x-full'}
+`}>
                 <div className="flex flex-col h-full bg-white dark:bg-[#111]">
                     <header className="px-5 py-4 border-b border-gray-100 dark:border-white/5 flex items-center justify-between bg-white dark:bg-[#111] shrink-0 h-16 pointer-events-auto mt-14 md:mt-0">
                         <h3 className="font-semibold text-gray-900 dark:text-white">Contact Details</h3>

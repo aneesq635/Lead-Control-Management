@@ -4,7 +4,7 @@ import { MessageSquare } from "lucide-react";
 
 export default function ConversationsIndexPage() {
     return (
-        <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-[#0a0a0a] transition-colors relative isolate w-full">
+        <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-[#0a0a0a] transition-colors h-full overflow-hidden">
             <div className="text-center max-w-sm px-6">
                 <div className="w-16 h-16 rounded-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-500 dark:text-indigo-400 flex items-center justify-center mx-auto mb-5 shadow-sm">
                     <MessageSquare size={28} />
