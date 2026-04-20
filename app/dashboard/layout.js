@@ -245,21 +245,8 @@ export default function DashboardLayout({ children }) {
                                 </div>
                             </div>
                             
-                            {/* Theme Toggle */}
-                            {mounted && (
-                                <button
-                                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                                    className="w-full mt-1 flex items-center justify-between px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-black/50 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/5 hover:border-gray-300 dark:hover:border-white/10 transition-colors group"
-                                >
-                                    <span className="flex items-center gap-2">
-                                        {theme === 'dark' ? <Moon size={16} className="text-indigo-400" /> : <Sun size={16} className="text-amber-500" />}
-                                        {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
-                                    </span>
-                                    <div className="w-8 h-4 bg-gray-200 dark:bg-white/20 rounded-full relative transition-colors duration-300">
-                                        <div className={`absolute top-[2px] left-[2px] w-3 h-3 bg-white rounded-full transition-transform duration-300 ${theme === 'dark' ? 'translate-x-4' : 'translate-x-0'}`} />
-                                    </div>
-                                </button>
-                            )}
+                            
+                           
                         </>
                     ) : (
                         <div className="flex flex-col items-center gap-2">
@@ -273,15 +260,7 @@ export default function DashboardLayout({ children }) {
                                 <Settings className="w-4 h-4" />
                             </Link>
                             
-                            {mounted && (
-                                <button
-                                    title="Toggle Theme"
-                                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                                    className="w-10 h-10 rounded-xl flex items-center justify-center bg-gray-50 dark:bg-black text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
-                                >
-                                    {theme === 'dark' ? <Moon size={16} className="text-indigo-400" /> : <Sun size={16} className="text-amber-500" />}
-                                </button>
-                            )}
+                            
                         </div>
                     )}
                 </div>
