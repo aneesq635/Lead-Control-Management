@@ -15,8 +15,8 @@ export default function SettingsPage() {
     return (
         <div className="p-6 sm:p-8 max-w-2xl">
             <div className="mb-8">
-                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Settings</h1>
-                <p className="text-sm text-gray-500 mt-1">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Settings</h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                     Manage your integrations and workspace configuration.
                 </p>
             </div>
@@ -26,16 +26,16 @@ export default function SettingsPage() {
                     <Link
                         key={href}
                         href={href}
-                        className="flex items-center gap-4 bg-white [#111] border border-gray-200 rounded-2xl p-5 hover:border-gray-300 :border-gray-600 hover:shadow-sm transition-all duration-150 group"
+                        className="flex items-center gap-4 bg-white dark:bg-[#111] border border-gray-200 dark:border-white/5 rounded-2xl p-5 hover:border-gray-300 dark:hover:border-white/10 hover:shadow-sm transition-all duration-150 group"
                     >
-                        <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0 group-hover:bg-gray-200 :bg-gray-700 transition-colors">
-                            <Icon className="w-5 h-5 text-gray-600 " />
+                        <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-gray-200 dark:group-hover:bg-white/10 transition-colors">
+                            <Icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-gray-900 ">{label}</p>
-                            <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{label}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{description}</p>
                         </div>
-                        <ChevronRight className="w-4 h-4 text-gray-400 shrink-0 group-hover:text-gray-600 :text-gray-400 transition-colors" />
+                        <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
                     </Link>
                 ))}
             </div>

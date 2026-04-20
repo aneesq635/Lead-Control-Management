@@ -6,7 +6,7 @@ import Header from "./Header";
 
 export default function ConditionalHeader() {
     const pathname = usePathname();
-    const hiddenRoutes = ["/dashboard"];
+    const hiddenRoutes = ["/dashboard","/dashboard/rag"];
     
     const shouldHideHeader = hiddenRoutes.some(route => 
         pathname.startsWith(route)
