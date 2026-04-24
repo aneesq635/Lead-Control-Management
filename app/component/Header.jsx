@@ -150,9 +150,9 @@ const Header = () => {
                         >
                             LeadFlow <span className="text-gray-500">AI</span>
                         </button>
-
+                        
                         {/* Center Nav - desktop */}
-                        <nav className="hidden sm:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
+                        <nav className="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
                             {navLinks.map(({ label, href }) => (
                                 <button
                                     key={href}
@@ -179,7 +179,7 @@ const Header = () => {
                             </button>
 
                             {/* Profile or Login - desktop */}
-                            <div className="hidden sm:block">
+                            <div className="hidden lg:block">
                                 {user ? (
                                     <ProfileDropdown user={user} theme={theme} onLogout={handleLogout} />
                                 ) : (
@@ -195,7 +195,7 @@ const Header = () => {
                             {/* Hamburger - mobile only */}
                             <button
                                 onClick={() => setMobileOpen(true)}
-                                className="sm:hidden w-9 h-9 rounded-xl flex items-center justify-center bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/5 text-gray-600 dark:text-gray-400"
+                                className="lg:hidden w-9 h-9 rounded-xl flex items-center justify-center bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/5 text-gray-600 dark:text-gray-400"
                             >
                                 <Menu size={18} />
                             </button>
@@ -207,13 +207,13 @@ const Header = () => {
             {/* Mobile Drawer Overlay */}
             {mobileOpen && (
                 <div
-                    className="sm:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+                    className="lg:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
                     onClick={() => setMobileOpen(false)}
                 />
             )}
 
             {/* Mobile Drawer */}
-            <div className={`sm:hidden fixed top-0 right-0 h-full w-72 z-50 bg-white dark:bg-[#0f0f0f] border-l border-gray-100 dark:border-white/5 shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${mobileOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+            <div className={`lg:hidden fixed top-0 right-0 h-full w-72 z-50 bg-white dark:bg-[#0f0f0f] border-l border-gray-100 dark:border-white/5 shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${mobileOpen ? 'translate-x-0' : 'translate-x-full'}`}>
                 
                 {/* Drawer Header */}
                 <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-white/5">

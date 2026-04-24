@@ -65,11 +65,12 @@ export default function DashboardLayout({ children }) {
                     <div className="flex items-center justify-between overflow-hidden">
                         <button
                             onClick={() => router.push("/")}
-                            className={`flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors cursor-pointer ${isCollapsed ? 'mx-auto' : ''}`}
+                            className={`flex items-center gap-1.5 text-xs text-black hover:text-gray-700 dark:hover:text-gray-200 transition-colors cursor-pointer ${isCollapsed ? 'mx-auto' : ''}`}
                             title="Go Back"
                         >
-                            <ArrowLeft className="w-4 h-4" />
-                            {!isCollapsed && <span>Back</span>}
+                            
+                            {!isCollapsed && <span className="text-lg font-bold">LeadFlow AI</span>}
+                            {isCollapsed && <span className="text-lg font-bold">LFA</span>}
                         </button>
                         {!isCollapsed && (
                             <button
