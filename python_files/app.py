@@ -1,3 +1,6 @@
+import dotenv
+dotenv.load_dotenv()
+
 import io
 import os
 import uuid
@@ -10,10 +13,6 @@ from rag_module.services.pdf_service import generate_inventory_pdf
 from rag_module.services.rag_service import ingest_pdf_to_rag, retrieve_relevant_docs
 import pymongo
 from bson import ObjectId
-import dotenv
-
-dotenv.load_dotenv()
-
 app = Flask(__name__)
 CORS(app)
 
