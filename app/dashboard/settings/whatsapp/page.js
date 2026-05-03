@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../../component/AuthContext";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
+import { setWorkspace as setWorkspaceInRedux , setSelectedWorkspace} from "@/app/component/MainSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { useSnackbar } from "notistack";
 
 export default function WhatsAppSettingsPage() {
     const [step, setStep] = useState("list"); // "list" | "configure"
@@ -19,6 +22,11 @@ export default function WhatsAppSettingsPage() {
     const [isEditing, setIsEditing] = useState(false);
     const [originalForm, setOriginalForm] = useState({});
     const [visibleFields, setVisibleFields] = useState({});
+    const workspaces = useSelector((state) => state.main.workspace);
+    const dispatch = useDispatch()
+    const { enqueueSnackbar } = useSnackbar();
+    const success_noti = (message)=> enqueueSnackbar(message, { variant: "success" });
+    const error_noti = (message)=> enqueueSnackbar(message, { variant: "error" });
 
 
     const [form, setForm] = useState({
@@ -54,7 +62,7 @@ export default function WhatsAppSettingsPage() {
             });
             const data = await res.json();
             if (!data.success) throw new Error(data.error);
-            setSuccess("WhatsApp configuration saved successfully!");
+            success_noti("WhatsApp configuration saved successfully!");
             // update local list
             setAvaiableWorkspace((prev) =>
                 prev.map((ws) =>
@@ -62,7 +70,7 @@ export default function WhatsAppSettingsPage() {
                 )
             );
         } catch (err) {
-            setError(err.message);
+            error_noti(err.message);
         } finally {
             setSaving(false);
             setIsEditing(false);
@@ -72,29 +80,36 @@ export default function WhatsAppSettingsPage() {
 
     // Delete workspace
     async function handleDeleteWorkspace(workspaceId) {
-        setError("");
-        setSuccess("");
-        setSaving(true);
-        try {
-            const res = await fetch("/api/workspace/delete", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ workspaceId }),
-            });
-            const data = await res.json();
-            setAvaiableWorkspace(avaiableWorkspace.filter((ws) => ws._id !== workspaceId));
-            if (!data.success) throw new Error(data.error);
-            setSuccess("Workspace deleted successfully!");
-            if (workspace?._id === workspaceId) {
-                setStep("list");
-                setWorkspace(null);
-            }
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setSaving(false);
+    setError("");
+    setSuccess("");
+    setSaving(true);
+    try {
+        const res = await fetch("/api/workspace/delete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ workspaceId }),
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+
+        const updated = avaiableWorkspace.filter((ws) => ws._id !== workspaceId);
+        setAvaiableWorkspace(updated);
+        dispatch(setWorkspaceInRedux(updated)); // ✅ Redux update
+        console.log("workspaces after del", workspaces);
+
+        dispatch(setSelectedWorkspace(updated[0])); // ✅ Select first remaining workspace
+
+        success_noti("Workspace deleted successfully!");
+        if (workspace?._id === workspaceId) {
+            setStep("list");
+            setWorkspace(null);
         }
+    } catch (err) {
+        error_noti(err.message);
+    } finally {
+        setSaving(false);
     }
+}
 
     return (
         <div className="flex-1 p-6 sm:p-8 bg-gray-50 dark:bg-[#0a0a0a] min-h-full overflow-y-auto transition-colors">

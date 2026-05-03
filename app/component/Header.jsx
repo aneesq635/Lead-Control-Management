@@ -19,8 +19,9 @@ const Header = () => {
     const navLinks = [
         { label: "Home", href: "/" },
         { label: "Dashboard", href: "/dashboard" },
-        { label: "RAG", href: "/dashboard/rag" },
         { label: "Conversations", href: "/dashboard/conversations" },
+        { label: "How It Works", href: "/how-it-works" },
+        { label: "WhatsApp Setup", href: "/whatsapp-setup" },
     ];
 
       const isActive = (href) => href === "/" ? pathname === "/" : pathname?.startsWith(href);

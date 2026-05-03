@@ -22,6 +22,18 @@ const conversationSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  user_type: {
+    type: String,
+    default: null,
+  },
+  agent_run: {
+    type: Boolean,
+    default: true,
+  },
+  unread_count: {
+    type: Number,
+    default: 0,
+  },
 });
 
 // Compound index to quickly find a conversation by workspace and phone

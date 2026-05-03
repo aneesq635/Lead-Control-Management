@@ -52,14 +52,16 @@ export async function POST(request) {
             conversation_id,
             phone,
             direction: 'outgoing',
+            sender_type: 'consultant',
             message_type: 'text',
             text,
             whatsapp_message_id: waMessageId,
             timestamp: new Date() // Current time for outgoing
         });
 
-        // Update conversation last activity
+        // Update conversation last activity and disable agent
         conversation.last_message_at = newMessage.timestamp;
+        conversation.agent_run = false;
         await conversation.save();
 
         // ── REAL-TIME: Emit the outgoing message to all clients in this room ───

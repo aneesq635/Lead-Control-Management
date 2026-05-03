@@ -1,0 +1,415 @@
+{
+  "communities": {
+    "0": [
+      "app_api_conversations_delete_route_js",
+      "app_api_conversations_get_route_js",
+      "app_api_conversations_id_route_js",
+      "app_api_dashboard_stats_route_js",
+      "app_api_lead_id_toogle_agent_route_js",
+      "app_api_messages_get_route_js",
+      "app_api_messages_send_route_js",
+      "app_api_whatsapp_setup_route_js",
+      "app_api_workspace_create_route_js",
+      "app_api_workspace_delete_route_js",
+      "app_api_workspace_get_route_js",
+      "create_route_get",
+      "create_route_post",
+      "delete_route_delete",
+      "delete_route_post",
+      "get_route_get",
+      "id_route_get",
+      "lib_mongodb_dbconnect",
+      "lib_mongodb_js",
+      "lib_whatsapp_js",
+      "lib_whatsapp_send_whatsapp_message",
+      "send_route_post",
+      "setup_route_post",
+      "stats_route_get",
+      "toogle_agent_route_patch"
+    ],
+    "1": [
+      "python_files_app_add_inventory_row_and_regenerate",
+      "python_files_app_delete_document",
+      "python_files_app_delete_inventory_row",
+      "python_files_app_doc_to_json",
+      "python_files_app_generate_pdf",
+      "python_files_app_get_documents",
+      "python_files_app_get_inventory",
+      "python_files_app_health",
+      "python_files_app_py",
+      "python_files_app_rationale_79",
+      "python_files_app_search_knowledge",
+      "python_files_app_serve_pdf",
+      "python_files_app_upload_document",
+      "python_files_rag_module_routes_rag_routes_py",
+      "python_files_rag_module_services_pdf_service_py",
+      "python_files_rag_module_services_rag_service_py",
+      "routes_rag_routes_delete_document",
+      "routes_rag_routes_generate_pdf",
+      "routes_rag_routes_get_documents",
+      "routes_rag_routes_upload_document",
+      "services_pdf_service_generate_inventory_pdf",
+      "services_pdf_service_rationale_8",
+      "services_rag_service_get_vector_store",
+      "services_rag_service_ingest_pdf_to_rag",
+      "services_rag_service_retrieve_relevant_docs"
+    ],
+    "2": [
+      "app_dashboard_page_jsx",
+      "dashboard_page_budgetchart",
+      "dashboard_page_customtooltip",
+      "dashboard_page_dashboardpage",
+      "dashboard_page_invareachart",
+      "dashboard_page_inventorytable",
+      "dashboard_page_invpricechart",
+      "dashboard_page_invpropertytypepie",
+      "dashboard_page_invsizechart",
+      "dashboard_page_kpicard",
+      "dashboard_page_leadsovertimechart",
+      "dashboard_page_leadsstatuschart",
+      "dashboard_page_leadstable",
+      "dashboard_page_propertytypechart",
+      "dashboard_page_scorebar",
+      "dashboard_page_statusbadge"
+    ],
+    "3": [
+      "app_component_authcontext_jsx",
+      "app_component_dataloader_jsx",
+      "app_component_header_jsx",
+      "app_dashboard_rag_page_jsx",
+      "app_dashboard_settings_whatsapp_page_js",
+      "app_workspace_create_page_jsx",
+      "component_authcontext_authprovider",
+      "component_authcontext_useauth",
+      "component_dataloader_dataloader",
+      "component_header_header",
+      "create_page_createworkspacepage",
+      "rag_page_autoregenmodal",
+      "rag_page_emptyrow",
+      "rag_page_ragpage",
+      "rag_page_toast",
+      "whatsapp_page_whatsappsettingspage"
+    ],
+    "4": [
+      "python_files_agent_build_rag_context",
+      "python_files_agent_clear_session",
+      "python_files_agent_get_or_create_session",
+      "python_files_agent_process_message",
+      "python_files_agent_py",
+      "python_files_agent_rationale_113",
+      "python_files_agent_rationale_190",
+      "python_files_app_receive_message",
+      "python_files_app_reset_session"
+    ],
+    "5": [
+      "app_api_webhook_whatsapp_route_js",
+      "lib_socket_server_js",
+      "socket_server_emitconversationupdated",
+      "socket_server_emitnewconversation",
+      "socket_server_emitnewmessage",
+      "socket_server_initsocketserver",
+      "whatsapp_route_get",
+      "whatsapp_route_post"
+    ],
+    "6": [
+      "app_dashboard_conversations_id_page_js",
+      "app_dashboard_conversations_layout_js",
+      "conversations_layout_conversationslayout",
+      "id_page_conversationthreadpage",
+      "lib_socket_client_js",
+      "socket_client_useconversationsocket",
+      "socket_client_useworkspacesocket"
+    ],
+    "7": [
+      "buyer_flow",
+      "lead_storage",
+      "python_ai_agent",
+      "rag_knowledge_base",
+      "seller_flow",
+      "socket_server",
+      "whatsapp_layer"
+    ],
+    "8": [
+      "app_authentication_page_jsx",
+      "authentication_page_page",
+      "authentication_page_pagewrapper",
+      "authentication_page_searchparamshandler"
+    ],
+    "9": [
+      "app_dashboard_leads_page_jsx",
+      "leads_page_leadspage",
+      "leads_page_scorebar",
+      "leads_page_statusbadge"
+    ],
+    "10": [
+      "app_layout_js",
+      "app_layout_rootlayout"
+    ],
+    "11": [
+      "app_page_home",
+      "app_page_js"
+    ],
+    "12": [
+      "app_api_dashboard_inventory_route_js",
+      "inventory_route_get"
+    ],
+    "13": [
+      "app_component_authcard_jsx",
+      "component_authcard_authcard"
+    ],
+    "14": [
+      "app_component_conditionalheader_jsx",
+      "component_conditionalheader_conditionalheader"
+    ],
+    "15": [
+      "app_component_ctabutton_jsx",
+      "component_ctabutton_ctabutton"
+    ],
+    "16": [
+      "app_component_herosection_jsx",
+      "component_herosection_herosection"
+    ],
+    "17": [
+      "app_component_provider_jsx",
+      "component_provider_providers"
+    ],
+    "18": [
+      "app_dashboard_layout_js",
+      "dashboard_layout_dashboardlayout"
+    ],
+    "19": [
+      "app_dashboard_conversations_page_js",
+      "conversations_page_conversationsindexpage"
+    ],
+    "20": [
+      "app_dashboard_settings_page_jsx",
+      "settings_page_settingspage"
+    ],
+    "21": [
+      "lcm_system",
+      "tech_stack"
+    ],
+    "22": [
+      "eslint_config_mjs"
+    ],
+    "23": [
+      "next_config_mjs"
+    ],
+    "24": [
+      "postcss_config_mjs"
+    ],
+    "25": [
+      "server_js"
+    ],
+    "26": [
+      "app_component_mainslice_jsx"
+    ],
+    "27": [
+      "app_component_store_jsx"
+    ],
+    "28": [
+      "app_component_supabase_jsx"
+    ],
+    "29": [
+      "models_conversation_js"
+    ],
+    "30": [
+      "models_documents_js"
+    ],
+    "31": [
+      "models_inventory_js"
+    ],
+    "32": [
+      "models_lead_js"
+    ],
+    "33": [
+      "models_message_js"
+    ],
+    "34": [
+      "models_workspace_js"
+    ]
+  },
+  "cohesion": {
+    "0": 0.09,
+    "1": 0.13,
+    "2": 0.12,
+    "3": 0.13,
+    "4": 0.28,
+    "5": 0.32,
+    "6": 0.29,
+    "7": 0.29,
+    "8": 0.5,
+    "9": 0.5,
+    "10": 1.0,
+    "11": 1.0,
+    "12": 1.0,
+    "13": 1.0,
+    "14": 1.0,
+    "15": 1.0,
+    "16": 1.0,
+    "17": 1.0,
+    "18": 1.0,
+    "19": 1.0,
+    "20": 1.0,
+    "21": 1.0,
+    "22": 1.0,
+    "23": 1.0,
+    "24": 1.0,
+    "25": 1.0,
+    "26": 1.0,
+    "27": 1.0,
+    "28": 1.0,
+    "29": 1.0,
+    "30": 1.0,
+    "31": 1.0,
+    "32": 1.0,
+    "33": 1.0,
+    "34": 1.0
+  },
+  "gods": [
+    {
+      "id": "lib_mongodb_dbconnect",
+      "label": "dbConnect()",
+      "degree": 14
+    },
+    {
+      "id": "component_authcontext_useauth",
+      "label": "useAuth()",
+      "degree": 7
+    },
+    {
+      "id": "services_rag_service_ingest_pdf_to_rag",
+      "label": "ingest_pdf_to_rag()",
+      "degree": 7
+    },
+    {
+      "id": "whatsapp_route_post",
+      "label": "POST()",
+      "degree": 6
+    },
+    {
+      "id": "python_files_app_doc_to_json",
+      "label": "_doc_to_json()",
+      "degree": 6
+    },
+    {
+      "id": "services_pdf_service_generate_inventory_pdf",
+      "label": "generate_inventory_pdf()",
+      "degree": 5
+    },
+    {
+      "id": "python_ai_agent",
+      "label": "Python AI Agent",
+      "degree": 5
+    },
+    {
+      "id": "get_route_get",
+      "label": "GET()",
+      "degree": 4
+    },
+    {
+      "id": "lib_whatsapp_send_whatsapp_message",
+      "label": "send_whatsapp_message()",
+      "degree": 4
+    },
+    {
+      "id": "python_files_agent_build_rag_context",
+      "label": "build_rag_context()",
+      "degree": 4
+    }
+  ],
+  "surprises": [
+    {
+      "source": "GET()",
+      "target": "dbConnect()",
+      "source_files": [
+        "app\\api\\webhook\\whatsapp\\route.js",
+        "lib\\mongodb.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities; peripheral node `GET()` unexpectedly reaches hub `dbConnect()`"
+    },
+    {
+      "source": "DELETE()",
+      "target": "dbConnect()",
+      "source_files": [
+        "app\\api\\conversations\\delete\\route.js",
+        "lib\\mongodb.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; peripheral node `DELETE()` unexpectedly reaches hub `dbConnect()`"
+    },
+    {
+      "source": "GET()",
+      "target": "dbConnect()",
+      "source_files": [
+        "app\\api\\conversations\\[id]\\route.js",
+        "lib\\mongodb.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; peripheral node `GET()` unexpectedly reaches hub `dbConnect()`"
+    },
+    {
+      "source": "GET()",
+      "target": "dbConnect()",
+      "source_files": [
+        "app\\api\\dashboard\\stats\\route.js",
+        "lib\\mongodb.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; peripheral node `GET()` unexpectedly reaches hub `dbConnect()`"
+    },
+    {
+      "source": "PATCH()",
+      "target": "dbConnect()",
+      "source_files": [
+        "app\\api\\lead\\[id]\\toogle-agent\\route.js",
+        "lib\\mongodb.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; peripheral node `PATCH()` unexpectedly reaches hub `dbConnect()`"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `dbConnect()` connect `Community 0` to `Community 5`?",
+      "why": "High betweenness centrality (0.035) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `useAuth()` connect `Community 3` to `Community 6`?",
+      "why": "High betweenness centrality (0.016) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `POST()` connect `Community 5` to `Community 0`?",
+      "why": "High betweenness centrality (0.012) - this node is a cross-community bridge."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 13 inferred relationships involving `dbConnect()` (e.g. with `DELETE()` and `GET()`) actually correct?",
+      "why": "`dbConnect()` has 13 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 6 inferred relationships involving `useAuth()` (e.g. with `DataLoader()` and `Header()`) actually correct?",
+      "why": "`useAuth()` has 6 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 5 inferred relationships involving `ingest_pdf_to_rag()` (e.g. with `generate_pdf()` and `add_inventory_row_and_regenerate()`) actually correct?",
+      "why": "`ingest_pdf_to_rag()` has 5 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 5 inferred relationships involving `POST()` (e.g. with `dbConnect()` and `emitNewConversation()`) actually correct?",
+      "why": "`POST()` has 5 INFERRED edges - model-reasoned connections that need verification."
+    }
+  ]
+}

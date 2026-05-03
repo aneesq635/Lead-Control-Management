@@ -14,6 +14,29 @@ def get_vector_store():
     # Chroma creates the directory if it doesn't exist
     return Chroma(persist_directory=CHROMA_DB_DIR, embedding_function=embeddings)
 
+def delete_workspace_documents(workspace_id, doc_type=None):
+    """
+    Delete documents from ChromaDB for a specific workspace and optionally a specific type.
+    """
+    vectorstore = get_vector_store()
+    
+    # Construct Chroma 'where' filter
+    where_filter = {"workspace_id": workspace_id}
+    if doc_type:
+        where_filter["type"] = doc_type
+    
+    try:
+        # Access the underlying collection directly for more reliable deletion
+        vectorstore._collection.delete(where=where_filter)
+        print(f"✅ Deleted documents from Chroma for workspace {workspace_id} with filter {where_filter}")
+    except Exception as e:
+        print(f"⚠️ Error deleting documents from Chroma: {e}")
+        # Fallback to langchain-chroma's delete if direct access fails (though it might still fail)
+        try:
+            vectorstore.delete(where=where_filter)
+        except:
+            pass
+
 def ingest_pdf_to_rag(file_path, metadata=None):
     if metadata is None:
         metadata = {}

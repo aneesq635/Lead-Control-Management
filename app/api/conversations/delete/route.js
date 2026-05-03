@@ -3,6 +3,8 @@ import dbConnect from "@/lib/mongodb";
 import Conversation from "@/models/Conversation";
 import Message from "@/models/Message";
 import Lead from "@/models/Lead";
+import Inventory from "@/models/Inventory";
+
 
 export async function DELETE(req) {
     try {
@@ -10,6 +12,7 @@ export async function DELETE(req) {
 
         const { searchParams } = new URL(req.url);
         const conversationId = searchParams.get("id");
+        const deleteData = searchParams.get("deleteData") === 'true';
 
         if (!conversationId) {
             return NextResponse.json(
@@ -27,16 +30,24 @@ export async function DELETE(req) {
             );
         }
 
-        // delete messages
+        // Always delete messages
         await Message.deleteMany({ conversation_id: conversationId });
 
-        // delete lead
-        const leadDoc = await Lead.findOne({ conversation_id: conversationId });
-        if (leadDoc) {
-            await leadDoc.deleteOne();
+        if (deleteData) {
+            // delete inventory if exists
+            const inventoryDoc = await Inventory.findOne({ conversation_id: conversationId });
+            if (inventoryDoc) {
+                await inventoryDoc.deleteOne();
+            }
+
+            // delete lead if exists
+            const leadDoc = await Lead.findOne({ conversation_id: conversationId });
+            if (leadDoc) {
+                await leadDoc.deleteOne();
+            }
         }
 
-        // delete conversation
+        // delete conversation document
         await conversation.deleteOne();
 
         return NextResponse.json(

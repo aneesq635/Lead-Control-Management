@@ -3,9 +3,11 @@ import Lead from '@/models/Lead'           // your existing Lead model
 
 export async function GET(request) {
   try {
+    
     await dbConnect()
 
     const { searchParams } = new URL(request.url)
+   
 
     // Optional query params for filtering
     const workspace_id = searchParams.get('workspace_id')

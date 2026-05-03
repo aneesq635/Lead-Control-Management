@@ -99,8 +99,10 @@ export async function POST(request) {
                             conversation = await Conversation.create({
                                 workspace_id: workspace.workspace_id,
                                 phone: senderPhone,
-                                name:name,
+                                name: name,
                                 last_message_at: timestamp,
+                                agent_run: true,
+                                agent_run: true,
                                 created_at: new Date()
                             });
                             emitNewConversation(workspace.workspace_id, conversation)
@@ -119,6 +121,7 @@ export async function POST(request) {
                                 conversation_id: conversation._id,
                                 phone: senderPhone,
                                 direction: 'incoming',
+                                sender_type: 'customer',
                                 message_type: messageType,
                                 text: text,
                                 whatsapp_message_id: messageId,
@@ -140,11 +143,12 @@ export async function POST(request) {
                                 name: conversation.name,
                                 last_message_at: conversation.last_message_at,
                                 workspace_id: conversation.workspace_id,
+                                agent_run: conversation.agent_run,
+                                user_type: conversation.user_type,
                             });
 
-                            const existingLead = await Lead.findOne({ conversation_id: conversation._id });
-                            const shouldRunAgent = !existingLead?.needs_human_followup;
-                            console.log("shouldRunAgent", shouldRunAgent)
+                            const shouldRunAgent = conversation.agent_run !== false;
+                            console.log("shouldRunAgent", shouldRunAgent, "original value:", conversation.agent_run)
 
                             if (shouldRunAgent) {
                                 try {
@@ -152,54 +156,90 @@ export async function POST(request) {
                                     const agentResponse = await fetch(`${pythonApiUrl}/message`, {
                                         method: 'POST',
                                         headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({ phone: senderPhone, message: text }),
+                                        body: JSON.stringify({ phone: senderPhone, name: conversation.name, message: text, workspace_id: workspace.workspace_id }),
                                     });
                                     console.log("agent response", agentResponse)
                                     if (agentResponse.ok) {
                                         const agentData = await agentResponse.json();
 
                                         if (agentData.success) {
-                                            // Lead update karo SIRF agar existing lead nahi hai
-                                            // Ya agar score improve hua ho — kabhi bhi downgrade mat karo
-                                            const currentLead = await Lead.findOne({ conversation_id: conversation._id });
+                                            const userType = agentData.user_type || 'unknown';
+                                            if (userType && userType !== 'unknown' && conversation.user_type !== userType) {
+                                                conversation.user_type = userType;
+                                                await conversation.save();
+                                                // Real-time: Emit update immediately
+                                                emitConversationUpdated(workspace.workspace_id, {
+                                                    _id: conversation._id,
+                                                    phone: conversation.phone,
+                                                    name: conversation.name,
+                                                    last_message_at: conversation.last_message_at,
+                                                    workspace_id: conversation.workspace_id,
+                                                    agent_run: conversation.agent_run,
+                                                    user_type: conversation.user_type,
+                                                });
+                                            }
 
-                                            const newScore = agentData.lead_score || 0;
-                                            const currentScore = currentLead?.lead_score || 0;
+                                            if (userType === 'seller') {
+                                                // Handled as Seller -> Save to Inventory if complete
+                                                if (agentData.needs_human_followup && agentData.inventory_data) {
+                                                    try {
+                                                        const pythonApiUrl = process.env.PYTHON_API_URL || 'http://127.0.0.1:5000';
+                                                        const inventoryItem = { ...agentData.inventory_data };
+                                                        inventoryItem.owner_name = conversation.name;
+                                                        inventoryItem.owner_phone = conversation.phone;
 
-                                            // Sirf update karo agar:
-                                            // 1. Lead pehli baar ban rahi ho, ya
-                                            // 2. Naya score zyada ho current se
-                                            const shouldUpdateLead = !currentLead || newScore >= currentScore;
+                                                        await fetch(`${pythonApiUrl}/api/rag/inventory/add`, {
+                                                            method: 'POST',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({ 
+                                                                workspace_id: workspace.workspace_id,
+                                                                user_id: conversation.phone,
+                                                                item: inventoryItem
+                                                            })
+                                                        });
+                                                        console.log("Inventory added via python API");
+                                                    } catch (err) {
+                                                        console.error("Error adding inventory:", err);
+                                                    }
+                                                }
+                                            } else if (userType === 'buyer') {
+                                                // Handled as Buyer -> Save to Lead
+                                                const currentLead = await Lead.findOne({ conversation_id: conversation._id });
 
-                                            if (shouldUpdateLead) {
-                                                // Lead fields mein sirf non-null values merge karo
-                                                const mergedLeadData = {
-                                                    name: agentData.lead_data?.name || currentLead?.lead_data?.name || null,
-                                                    budget: agentData.lead_data?.budget || currentLead?.lead_data?.budget || null,
-                                                    property_type: agentData.lead_data?.property_type || currentLead?.lead_data?.property_type || null,
-                                                    size: agentData.lead_data?.size || currentLead?.lead_data?.size || null,
-                                                    area: agentData.lead_data?.area || currentLead?.lead_data?.area || null,
-                                                    purpose: agentData.lead_data?.purpose || currentLead?.lead_data?.purpose || null,
-                                                };
+                                                const newScore = agentData.lead_score || 0;
+                                                const currentScore = currentLead?.lead_score || 0;
 
-                                                await Lead.findOneAndUpdate(
-                                                    { conversation_id: conversation._id },
-                                                    {
-                                                        workspace_id: workspace.workspace_id,
-                                                        conversation_id: conversation._id,
-                                                        phone: senderPhone,
-                                                        name: conversation.name,
-                                                        lead_data: mergedLeadData,
-                                                        lead_score: newScore,
-                                                        lead_status: agentData.lead_status || 'cold',
-                                                        needs_human_followup: agentData.needs_human_followup || false,
-                                                        next_action: agentData.next_action || ''
-                                                    },
-                                                    { upsert: true, new: true }
-                                                );
-                                                console.log('Lead data updated successfully');
-                                            } else {
-                                                console.log(`Lead score nahi badhaa (${currentScore} → ${newScore}), doc update skip kiya`);
+                                                const shouldUpdateLead = !currentLead || newScore >= currentScore;
+
+                                                if (shouldUpdateLead) {
+                                                    const mergedLeadData = {
+                                                        name: agentData.lead_data?.name || currentLead?.lead_data?.name || null,
+                                                        budget: agentData.lead_data?.budget || currentLead?.lead_data?.budget || null,
+                                                        property_type: agentData.lead_data?.property_type || currentLead?.lead_data?.property_type || null,
+                                                        size: agentData.lead_data?.size || currentLead?.lead_data?.size || null,
+                                                        area: agentData.lead_data?.area || currentLead?.lead_data?.area || null,
+                                                        purpose: agentData.lead_data?.purpose || currentLead?.lead_data?.purpose || null,
+                                                    };
+
+                                                    await Lead.findOneAndUpdate(
+                                                        { conversation_id: conversation._id },
+                                                        {
+                                                            workspace_id: workspace.workspace_id,
+                                                            conversation_id: conversation._id,
+                                                            phone: senderPhone,
+                                                            name: conversation.name,
+                                                            lead_data: mergedLeadData,
+                                                            lead_score: newScore,
+                                                            lead_status: agentData.lead_status || 'cold',
+                                                            needs_human_followup: agentData.needs_human_followup || false,
+                                                            next_action: agentData.next_action || ''
+                                                        },
+                                                        { upsert: true, new: true }
+                                                    );
+                                                    console.log('Lead data updated successfully');
+                                                } else {
+                                                    console.log(`Lead score nahi badhaa (${currentScore} → ${newScore}), doc update skip kiya`);
+                                                }
                                             }
 
                                             // Reply bhejo
@@ -212,6 +252,7 @@ export async function POST(request) {
                                                     conversation_id: conversation._id,
                                                     phone: senderPhone,
                                                     direction: 'outgoing',
+                                                    sender_type: 'agent',
                                                     message_type: 'text',
                                                     text: agentData.reply,
                                                     whatsapp_message_id: waMessageId,
@@ -229,7 +270,15 @@ export async function POST(request) {
                                                     name: conversation.name,
                                                     last_message_at: conversation.last_message_at,
                                                     workspace_id: conversation.workspace_id,
+                                                    agent_run: conversation.agent_run,
                                                 });
+                                            }
+
+                                            // Final check: if agent said it needs followup, disable agent for next time
+                                            if (agentData.needs_human_followup) {
+                                                conversation.agent_run = false;
+                                                await conversation.save();
+                                                console.log(`Agent disabled for ${senderPhone} as needs_human_followup is true`);
                                             }
                                         }
                                     }
@@ -238,7 +287,7 @@ export async function POST(request) {
                                 }
                             } else {
                                 // Agent bypass — Admin manually handle karega
-                                console.log(`Lead ${senderPhone} ke liye needs_human_followup=true hai. Agent bypass kiya gaya.`);
+                                console.log(`Agent bypassed for ${senderPhone}. Agent run is disabled for this conversation.`);
                             }
                         }
                     }

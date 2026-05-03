@@ -38,6 +38,11 @@ const messageSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  sender_type: {
+    type: String,
+    enum: ['customer', 'agent', 'consultant'],
+    default: 'customer',
+  },
 });
 
 export default mongoose.models.Message || mongoose.model('Message', messageSchema);

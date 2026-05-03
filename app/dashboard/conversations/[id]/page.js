@@ -27,7 +27,9 @@ export default function ConversationThreadPage() {
     const [error, setError] = useState("");
     const [messageText, setMessageText] = useState("");
     const [sending, setSending] = useState(false);
-    const [detailsOpen, setDetailsOpen] = useState(false); // Toggle the 3rd right pane
+    const [detailsOpen, setDetailsOpen] = useState(false); 
+    const [inventoryData, setInventoryData] = useState(null);
+    const [agentEnabled, setAgentEnabled] = useState(conversation?.agent_run ?? true);
 
     const [messages, setMessages] = useState(currentmessages);
 
@@ -56,7 +58,44 @@ export default function ConversationThreadPage() {
             }
         };
         fetchMessages();
+
+
     }, [id]);
+
+    useEffect(() => {
+        if (conversation?.user_type === 'seller' && selectedWorkspace) {
+            const fetchInventory = async () => {
+                try {
+                    const pythonApiUrl = 'http://127.0.0.1:5000'; // Fallback to local if env not reachable in client
+                    const res = await fetch(`${pythonApiUrl}/api/rag/inventory?workspace_id=${selectedWorkspace.workspace_id}`);
+                    const data = await res.json();
+                    if (data.success) {
+                        // Find this specific user's inventory
+                        const userInv = data.inventory.find(item => item.owner_phone === conversation.phone);
+                        if (userInv) setInventoryData(userInv);
+                    }
+                } catch (err) {
+                    console.error("Error fetching inventory:", err);
+                }
+            };
+            fetchInventory();
+        }
+    }, [conversation, selectedWorkspace]);
+
+    const toggleAgent = async () => {
+        const newValue = !agentEnabled;
+        setAgentEnabled(newValue);
+        try {
+            await fetch('/api/conversations/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, agent_run: newValue })
+            });
+        } catch (err) {
+            console.error("Error toggling agent:", err);
+            setAgentEnabled(!newValue);
+        }
+    };
 
     const handleSocketMessage = useCallback((newMessage) => {
         setMessages((prev) => {
@@ -65,7 +104,14 @@ export default function ConversationThreadPage() {
         });
     }, []);
 
-    const { connected } = useConversationSocket(id, handleSocketMessage);
+    const handleConversationUpdate = useCallback((updatedConv) => {
+        // Since we're using Redux and the Layout handles global updates, 
+        // we don't necessarily need to do much here, but we can log it or 
+        // trigger local state updates if needed.
+        console.log("Conversation updated in real-time:", updatedConv);
+    }, []);
+
+    const { connected } = useConversationSocket(id, handleSocketMessage, handleConversationUpdate);
 
     useEffect(() => {
         if (!bottomRef.current) return;
@@ -166,6 +212,15 @@ export default function ConversationThreadPage() {
                     </div>
 
                     <button 
+                        onClick={toggleAgent}
+                        className={`hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border shadow-sm mr-2 ${agentEnabled ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}
+                        title={agentEnabled ? "AI Agent is Active" : "AI Agent is Paused"}
+                    >
+                        <span className={`w-1.5 h-1.5 rounded-full ${agentEnabled ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+                        {agentEnabled ? "AI Active" : "AI Off"}
+                    </button>
+
+                    <button 
                         onClick={() => setDetailsOpen(!detailsOpen)}
                         className={`hidden md:flex p-2 rounded-lg transition-colors ${detailsOpen ? 'bg-indigo-50 dark:bg-white/10 text-indigo-600 dark:text-white' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'}`}
                         title="Show Details"
@@ -216,12 +271,19 @@ export default function ConversationThreadPage() {
                                                 : 'bg-[#d9fdd3] dark:bg-[#005c4b] text-gray-900 dark:text-gray-100 rounded-2xl rounded-tr-sm border border-transparent dark:border-white/5'
                                             }`}
                                         >
-                                            <p className="whitespace-pre-wrap leading-relaxed pb-3">
-                                                {msg.text || `[${msg.message_type}]`}
-                                            </p>
-                                            <span className={`absolute bottom-1.5 right-3 text-[10px] ${isIncoming ? 'text-gray-400 dark:text-gray-500' : 'text-emerald-700/70 dark:text-green-200/50'}`}>
-                                                {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </span>
+                                            <div className="flex flex-col">
+                                                {((!isIncoming && msg.sender_type === 'agent') || (!isIncoming && msg.sender_type === 'consultant')) && (
+                                                    <span className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${msg.sender_type === 'agent' ? 'text-indigo-600 dark:text-indigo-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                                                        {msg.sender_type === 'agent' ? 'Agent Generated' : 'Consultant'}
+                                                    </span>
+                                                )}
+                                                <p className="whitespace-pre-wrap leading-relaxed pb-3">
+                                                    {msg.text || `[${msg.message_type}]`}
+                                                </p>
+                                                <span className={`absolute bottom-1.5 right-3 text-[10px] ${isIncoming ? 'text-gray-400 dark:text-gray-500' : 'text-emerald-700/70 dark:text-green-200/50'}`}>
+                                                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -295,7 +357,7 @@ export default function ConversationThreadPage() {
                                 <Phone size={12} /> {conversation.phone}
                             </p>
                             
-                            {currentLead && (
+                            {conversation.user_type === 'buyer' && currentLead && (
                                 <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mt-3 shadow-sm ${
                                     currentLead.lead_status === 'hot' ? 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 border border-red-100 dark:border-red-900/50' : 
                                     currentLead.lead_status === 'warm' ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-100 dark:border-amber-900/50' : 
@@ -304,11 +366,72 @@ export default function ConversationThreadPage() {
                                     {currentLead.lead_status} Lead {currentLead.lead_score && `· Score: ${currentLead.lead_score}`}
                                 </span>
                             )}
+
+                            {conversation.user_type === 'seller' && (
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mt-3 shadow-sm bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 border border-purple-100 dark:border-purple-900/50">
+                                    Seller / Owner
+                                </span>
+                            )}
                         </div>
 
                         <hr className="border-gray-100 dark:border-white/5" />
 
-                        {currentLead ? (
+                        {conversation.user_type === 'seller' ? (
+                            <div className="space-y-4">
+                                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Inventory Information</h3>
+                                {inventoryData ? (
+                                    <div className="grid grid-cols-1 gap-3">
+                                        <div className="bg-gray-50 dark:bg-[#18181a] border border-gray-100 dark:border-white/5 p-3.5 rounded-xl flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                                                <MapPin size={16} />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] text-gray-400 font-semibold uppercase">Location</p>
+                                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{inventoryData.area || 'Not specified'}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-gray-50 dark:bg-[#18181a] border border-gray-100 dark:border-white/5 p-3.5 rounded-xl flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                                                <Building size={16} />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] text-gray-400 font-semibold uppercase">Property Type</p>
+                                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 capitalize">{inventoryData.property_type || 'Unknown'}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-gray-50 dark:bg-[#18181a] border border-gray-100 dark:border-white/5 p-3.5 rounded-xl flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                                                <DollarSign size={16} />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] text-gray-400 font-semibold uppercase">Price Demand</p>
+                                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{inventoryData.price || 'Not set'}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="bg-gray-50 dark:bg-[#18181a] border border-gray-100 dark:border-white/5 p-3.5 rounded-xl flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                                                <Info size={16} />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] text-gray-400 font-semibold uppercase">Size</p>
+                                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{inventoryData.size || 'Unknown'}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center text-center p-6 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-xl">
+                                        <Info size={24} className="text-gray-400 mb-2" />
+                                        <h3 className="text-sm font-medium text-gray-900 dark:text-white">Collecting Property Details</h3>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                            The agent is still gathering inventory details from the seller.
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        ) : currentLead ? (
                             <div className="space-y-4">
                                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Lead Information</h3>
 
@@ -349,7 +472,7 @@ export default function ConversationThreadPage() {
                                         </div>
                                         <div>
                                             <p className="text-[10px] text-gray-400 font-semibold uppercase">Added On</p>
-                                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{new Date(currentLead.createdAt).toLocaleDateString()}</p>
+                                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{new Date(currentLead.createdAt || currentLead.created_at).toLocaleDateString()}</p>
                                         </div>
                                     </div>
                                 </div>

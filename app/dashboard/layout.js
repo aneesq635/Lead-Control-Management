@@ -34,12 +34,13 @@ export default function DashboardLayout({ children }) {
 
     const settingsLinks = [
         { href: '/dashboard/settings/whatsapp', label: 'WhatsApp', icon: Smartphone },
+        { href: '/dashboard/settings/profile', label: 'Profile', icon: Smartphone },
     ];
 
     const isCollapsed = sidebarCollapsed;
 
     return (
-        <div className="flex h-screen bg-gray-50 dark:bg-[#0a0a0a] transition-colors duration-300">
+        <div className="flex h-screen bg-gray-50 dark:bg-[#0a0a0a] transition-colors duration-300  overflow-y">
             {/* Mobile Header */}
             <div className="md:hidden absolute top-0 left-0 right-0 h-14 bg-white dark:bg-[#111] border-b border-gray-200 dark:border-white/5 flex items-center justify-between px-4 z-40">
                 <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 -ml-2 text-gray-500 dark:text-gray-400">
@@ -69,8 +70,8 @@ export default function DashboardLayout({ children }) {
                             title="Go Back"
                         >
                             
-                            {!isCollapsed && <span className="text-lg font-bold">LeadFlow AI</span>}
-                            {isCollapsed && <span className="text-lg font-bold">LFA</span>}
+                            {!isCollapsed && <span className="text-lg font-bold dark:text-white text-black">LeadFlow AI</span>}
+                            {isCollapsed && <span className="text-lg font-bold dark:text-white text-black">LFA</span>}
                         </button>
                         {!isCollapsed && (
                             <button
@@ -214,7 +215,9 @@ export default function DashboardLayout({ children }) {
                     {!isCollapsed ? (
                         <>
                             <button
-                                onClick={() => setSettingsOpen(!settingsOpen)}
+                                onClick={() => {setSettingsOpen(!settingsOpen)
+                                    router.push('/dashboard/settings')
+                                }}
                                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5`}
                             >
                                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0 ${

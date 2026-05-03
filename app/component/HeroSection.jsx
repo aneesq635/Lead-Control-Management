@@ -1,8 +1,32 @@
 import React from 'react';
 import CTAButton from './CTAButton';
-
+import Link from 'next/link';
+import { MessageCircle, Search, Database, BarChart3 } from 'lucide-react';
+const features = [
+  {
+    title: "WhatsApp Integration",
+    description: "Seamless connection with Official WhatsApp Cloud API.",
+    icon: <MessageCircle className="w-8 h-8 text-emerald-500" />
+  },
+  {
+    title: "AI Agent",
+    description: "Powered by LangChain + OpenAI for intelligent interactions.",
+    icon: <Search className="w-8 h-8 text-indigo-500" />
+  },
+  {
+    title: "Knowledge Base (RAG)",
+    description: "Retrieval-Augmented Generation for accurate property data.",
+    icon: <Database className="w-8 h-8 text-purple-500" />
+  },
+  {
+    title: "CRM Dashboard",
+    description: "Advanced analytics and lead management interface.",
+    icon: <BarChart3 className="w-8 h-8 text-blue-500" />
+  }
+];
 const HeroSection = () => {
     return (
+        <>
         <section className="relative overflow-hidden bg-white dark:bg-[#0a0a0a] pt-16 sm:pt-24 lg:pt-32 pb-16">
             {/* Background decoration */}
             <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/3 opacity-30 pointer-events-none">
@@ -21,12 +45,12 @@ const HeroSection = () => {
                             AI powered WhatsApp lead management system that automatically talks to customers, captures leads, and helps your team close deals faster.
                         </p>
                         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                            <CTAButton variant="primary" className="shadow-[0_0_20px_rgba(0,0,0,0.1)] active:scale-95">
-                                Start Free Trial
-                            </CTAButton>
-                            <CTAButton variant="secondary" className="active:scale-95 shadow-sm">
+                            <Link href="/dashboard" className="bg-gray-900 dark:bg-gray-100 text-white dark:text-black px-6 py-3 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors">
+                                Get Started Now
+                            </Link>
+                            <Link href="/how-it-works" className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-6 py-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                                 See How It Works
-                            </CTAButton>
+                            </Link>
                         </div>
 
                         <div className="mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-sm text-gray-500 dark:text-gray-400">
@@ -133,6 +157,29 @@ const HeroSection = () => {
                 </div>
             </div>
         </section>
+         <section className="py-24 px-6 bg-gray-50 dark:bg-[#050505]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold mb-4">Core Technology</h2>
+            <p className="text-gray-500 dark:text-gray-400">Built with modern tools for maximum performance.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {features.map((feature, index) => (
+              <div key={index} className="group p-8 bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/5 rounded-[2.5rem] hover:border-indigo-500/30 transition-all duration-300">
+                <div className="mb-6 bg-gray-50 dark:bg-white/5 w-16 h-16 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110">
+                  {feature.icon}
+                </div>
+                <h4 className="text-lg font-bold mb-3">{feature.title}</h4>
+                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                  {feature.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      </>
     );
 };
 

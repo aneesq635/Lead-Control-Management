@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useAuth } from "../../component/AuthContext";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { useSelector, useDispatch } from "react-redux";
+import { setWorkspace, setSelectedWorkspace } from "../../component/MainSlice";
 
 export default function CreateWorkspacePage() {
     const [companyName, setCompanyName] = useState("");
@@ -12,6 +14,9 @@ export default function CreateWorkspacePage() {
     const { user } = useAuth();
     const router = useRouter();
     const supabase_id = user?.id;
+    const workspaces = useSelector((state) => state.main.workspace); // Redux se current workspaces lo
+    console.log("workspace ka data ", workspaces);
+    const dispatch = useDispatch();
 
     async function handleCreateWorkspace() {
         setError("");
@@ -27,7 +32,18 @@ export default function CreateWorkspacePage() {
                 body: JSON.stringify({ company_name: companyName, supabase_id }),
             });
             const data = await res.json();
+
+            console.log("data after workspace creation", data);
             if (!data.success) throw new Error(data.error);
+            // ✅ Naya workspace Redux mein add karo - real time update
+            const newWorkspace = data.workspace; // API se naya workspace aata hai
+            console.log("before Workspace", workspaces);
+            const updatedWorkspaces = [newWorkspace, ...workspaces];
+            dispatch(setWorkspace(updatedWorkspaces));
+            dispatch(setSelectedWorkspace(newWorkspace)); // auto-select new one
+            console.log("updatedWorkspaces", updatedWorkspaces);
+            console.log("newWorkspace", newWorkspace);
+
             // go back to whatsapp settings after creation
             router.push("/dashboard/settings/whatsapp");
         } catch (err) {

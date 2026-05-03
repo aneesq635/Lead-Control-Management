@@ -16,14 +16,15 @@ export function DataLoader() {
     const { user } = useAuth();
     const supabase_id = user?.id;
     const selectedWorkspace = useSelector((state) => state.main.selectedWorkspace);
+    const workspaces = useSelector((state) => state.main.workspaces);   
 
     // Fetch leads
     useEffect(() => {
-        if (!supabase_id) return; // Optional: Only fetch leads if user is logged in
+        if (!supabase_id || !selectedWorkspace) return; // Optional: Only fetch leads if user is logged in
         
         const fetchLeads = async () => {
             try {
-                const res = await fetch('/api/dashboard/stats');
+                const res = await fetch(`/api/dashboard/stats?workspace_id=${selectedWorkspace?.workspace_id}`);
                 if (!res.ok) throw new Error('Failed to fetch leads');
                 const data = await res.json();
                 dispatch(setLeads(data.leads || []));
@@ -32,7 +33,7 @@ export function DataLoader() {
             }
         };
         fetchLeads();
-    }, [supabase_id, dispatch]);
+    }, [supabase_id, dispatch, selectedWorkspace]);
 
     // Fetch workspaces
     useEffect(() => {

@@ -1,8 +1,14 @@
 // app/dashboard/settings/page.js
 import Link from 'next/link';
-import { Smartphone, ChevronRight } from 'lucide-react';
+import { Smartphone, ChevronRight, UserCircle } from 'lucide-react';
 
 const settingsOptions = [
+    {
+        href: '/dashboard/settings/profile',
+        label: 'Business Profile',
+        description: 'Set your WhatsApp display name, profile picture, bio, description, address, and more.',
+        icon: UserCircle,
+    },
     {
         href: '/dashboard/settings/whatsapp',
         label: 'WhatsApp Settings',

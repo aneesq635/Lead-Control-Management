@@ -23,8 +23,10 @@ def generate_inventory_pdf(data_rows, output_path):
         doc.build(elements)
         return output_path
         
-    # Table headers
-    headers = list(data_rows[0].keys())
+    # Table headers, excluding internal IDs
+    all_keys = list(data_rows[0].keys())
+    excluded_keys = {'workspace_id', 'user_id', '_id'}
+    headers = [k for k in all_keys if k not in excluded_keys]
     
     # Table data
     table_data = [headers]

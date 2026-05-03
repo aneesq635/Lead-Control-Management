@@ -10,7 +10,7 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from agent import process_message, clear_session
 from rag_module.services.pdf_service import generate_inventory_pdf
-from rag_module.services.rag_service import ingest_pdf_to_rag, retrieve_relevant_docs
+from rag_module.services.rag_service import ingest_pdf_to_rag, retrieve_relevant_docs, delete_workspace_documents
 import pymongo
 from bson import ObjectId
 app = Flask(__name__)
@@ -32,20 +32,23 @@ inventory_collection = db["inventory"]   # stores inventory rows per workspace
 def receive_message():
     data = request.get_json(force=True)
     phone        = data.get("phone")
+    name         = data.get("name", "")
     message      = data.get("message")
     workspace_id = data.get("workspace_id", "default")
 
     if not phone or not message:
         return jsonify({"success": False, "error": "Both 'phone' and 'message' fields are required."}), 400
 
-    result = process_message(phone, message, workspace_id)
+    result = process_message(phone, message, workspace_id, name)
     print("result", result)
 
     return jsonify({
         "success": True,
         "phone": phone,
         "reply": result.get("reply"),
+        "user_type": result.get("user_type", "unknown"),
         "lead_data": result.get("lead_data"),
+        "inventory_data": result.get("inventory_data"),
         "lead_score": result.get("lead_score"),
         "lead_status": result.get("lead_status"),
         "next_action": result.get("next_action"),
@@ -135,6 +138,7 @@ def generate_pdf():
         inventory_collection.insert_many(rows_to_insert)
 
     # Auto-ingest into RAG / vector store
+    delete_workspace_documents(workspace_id, "inventory")
     metadata = {"workspace_id": workspace_id, "type": "inventory", "source": file_name}
     ingest_pdf_to_rag(file_path, metadata)
     print("PDF generated and knowledge ingested", doc)
@@ -145,6 +149,69 @@ def generate_pdf():
         "document": _doc_to_json(doc)
     })
 
+
+# ── POST /api/rag/inventory/add  — Add single inventory and regenerate PDF ──
+# Body: { workspace_id, user_id, item: { property_type, area, size, price, description, owner_name, owner_phone } }
+@app.route("/api/rag/inventory/add", methods=["POST"])
+def add_inventory_row_and_regenerate():
+    data = request.get_json(force=True)
+    workspace_id = data.get("workspace_id", "default")
+    user_id = data.get("user_id", "auto")
+    item = data.get("item")
+
+    if not item:
+        return jsonify({"error": "No item provided"}), 400
+
+    # Upsert single row to prevent duplicates for the same user
+    row_to_insert = {"workspace_id": workspace_id, "user_id": user_id, **item}
+    inventory_collection.update_one(
+        {"workspace_id": workspace_id, "user_id": user_id},
+        {"$set": row_to_insert},
+        upsert=True
+    )
+
+    # Fetch all rows to regenerate PDF
+    all_inventory = list(inventory_collection.find({"workspace_id": workspace_id}, {"_id": 0}))
+
+    # Generate PDF into a temp file
+    tmp_dir = tempfile.gettempdir()
+    file_name = f"inventory_{workspace_id[:8]}.pdf"
+    file_path = os.path.join(tmp_dir, file_name)
+    generate_inventory_pdf(all_inventory, file_path)
+
+    # Read binary PDF
+    with open(file_path, "rb") as f:
+        pdf_binary = f.read()
+
+    now = datetime.now().isoformat()
+
+    # UPSERT: replace the single inventory PDF for this workspace
+    documents_collection.update_one(
+        {"workspace_id": workspace_id, "type": "inventory"},
+        {"$set": {
+            "user_id": user_id,
+            "file_name": file_name,
+            "pdf_data": pdf_binary,
+            "updated_at": now,
+        },
+         "$setOnInsert": {"created_at": now}
+        },
+        upsert=True
+    )
+
+    doc = documents_collection.find_one({"workspace_id": workspace_id, "type": "inventory"})
+
+    # Auto-ingest into RAG / vector store
+    delete_workspace_documents(workspace_id, "inventory")
+    metadata = {"workspace_id": workspace_id, "type": "inventory", "source": file_name}
+    ingest_pdf_to_rag(file_path, metadata)
+    print("New inventory added and knowledge ingested", doc)
+
+    return jsonify({
+        "success": True,
+        "message": "Inventory added, PDF regenerated and knowledge ingested",
+        "document": _doc_to_json(doc) if doc else None
+    })
 
 # ── GET /api/rag/pdf/<doc_id>  — stream the PDF from MongoDB ──
 @app.route("/api/rag/pdf/<doc_id>", methods=["GET"])
